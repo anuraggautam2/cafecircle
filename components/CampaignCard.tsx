@@ -21,16 +21,16 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
   };
 
   return (
-    <div className="glass-card rounded-2xl overflow-hidden flex flex-col group transition-all duration-300">
+    <div className="glass-card rounded-2xl overflow-hidden flex flex-col group">
       {/* 1. Large Focus Photography */}
-      <Link href={`/campaigns/${campaign.slug || campaign.id}`} className="block relative aspect-[16/10] overflow-hidden bg-stone-100">
+      <Link href={`/campaigns/${campaign.slug || campaign.id}`} className="block relative aspect-[16/10] overflow-hidden bg-stone-200/40">
         <img
           src={campaign.cafe?.coverImage || 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80'}
           alt={campaign.title}
           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
         />
         <div className="absolute top-3 right-3">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-mono font-medium bg-white/85 backdrop-blur-md text-[#181514] border border-white/60 shadow-sm">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-mono font-medium bg-white/50 backdrop-blur-md text-[#181514] border border-white/70 shadow-sm">
             {percentFunded}% funded
           </span>
         </div>
@@ -54,7 +54,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
 
           {/* Thin Progress Line */}
           <div className="mt-4 space-y-1.5">
-            <div className="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
+            <div className="w-full bg-stone-300/35 h-1.5 rounded-full overflow-hidden">
               <div
                 className="bg-[#2C1810] h-full rounded-full transition-all duration-300"
                 style={{ width: `${percentFunded}%` }}
@@ -67,7 +67,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           </div>
         </div>
 
-        {/* 3. One Clear View Cafe / Campaign Button (Coffee Brown Primary Button) */}
+        {/* 3. Primary Button */}
         <Link
           href={`/campaigns/${campaign.slug || campaign.id}`}
           className="btn-primary w-full text-center py-2.5 px-3 text-xs block shadow-sm"

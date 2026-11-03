@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Cafe } from '@/lib/types';
 import CafeCard from '@/components/CafeCard';
-import { Search, MapPin, SlidersHorizontal, Star, Check } from 'lucide-react';
+import { Search, MapPin } from 'lucide-react';
 
 function ExploreContent() {
   const searchParams = useSearchParams();
@@ -91,7 +91,7 @@ function ExploreContent() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       {/* 1. TOP HERO SECTION */}
       <div className="text-center max-w-3xl mx-auto space-y-3 pt-4">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-medium text-stone-700 bg-white/70 border border-white/80 shadow-sm backdrop-blur-md">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-mono font-medium text-stone-700 bg-white/40 border border-white/65 shadow-2xs backdrop-blur-md">
           <span className="w-1.5 h-1.5 rounded-full bg-[#B84A22]" />
           Ghaziabad & Delhi NCR Directory • {cafes.length} Specialty Places
         </div>
@@ -115,13 +115,13 @@ function ExploreContent() {
                 placeholder="Search by cafe name, cuisine, or street..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 text-xs text-[#181514] bg-white/80 border border-stone-200/60 rounded-xl placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#2C1810]/10 focus:bg-white transition-all"
+                className="w-full pl-10 pr-3 py-2 text-xs text-[#181514] bg-white/45 backdrop-blur-md border border-white/60 rounded-xl placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#2C1810]/10 focus:bg-white/70 transition-all"
               />
             </div>
 
             {/* Location Selector Dropdown */}
             <div className="relative w-full sm:w-48 shrink-0">
-              <div className="flex items-center gap-1.5 px-3 py-2 bg-white/80 border border-stone-200/60 rounded-xl text-xs text-[#181514]">
+              <div className="flex items-center gap-1.5 px-3 py-2 bg-white/45 backdrop-blur-md border border-white/60 rounded-xl text-xs text-[#181514]">
                 <MapPin className="w-3.5 h-3.5 text-[#B84A22] shrink-0" />
                 <select
                   value={selectedLocation}
@@ -129,7 +129,7 @@ function ExploreContent() {
                   className="w-full bg-transparent text-xs text-[#181514] font-medium focus:outline-none cursor-pointer"
                 >
                   {locations.map((loc) => (
-                    <option key={loc} value={loc}>
+                    <option key={loc} value={loc} className="bg-[#FAF7F2] text-[#181514]">
                       {loc === 'All' ? 'All Locations' : loc}
                     </option>
                   ))}
@@ -155,7 +155,7 @@ function ExploreContent() {
                 className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all ${
                   selectedCuisine === c
                     ? 'bg-[#2C1810] text-white font-medium shadow-sm'
-                    : 'bg-white/80 text-stone-600 border border-stone-200/60 hover:bg-white hover:text-stone-900'
+                    : 'bg-white/45 backdrop-blur-md text-stone-700 border border-white/60 hover:bg-white/65 hover:text-stone-900'
                 }`}
               >
                 {c}
@@ -165,7 +165,7 @@ function ExploreContent() {
         </div>
 
         {/* Right: Rating Filter & Open Now Toggle */}
-        <div className="flex flex-wrap items-center gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-stone-200/50">
+        <div className="flex flex-wrap items-center gap-4 pt-2 md:pt-0 border-t md:border-t-0 border-stone-200/40">
           {/* Rating Pills */}
           <div className="space-y-1">
             <div className="text-[11px] font-mono uppercase tracking-wider text-stone-500">
@@ -179,7 +179,7 @@ function ExploreContent() {
                   className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     selectedRating === r
                       ? 'bg-[#2C1810] text-white shadow-sm'
-                      : 'bg-white/80 text-stone-600 border border-stone-200/60 hover:bg-white'
+                      : 'bg-white/45 backdrop-blur-md text-stone-700 border border-white/60 hover:bg-white/65'
                   }`}
                 >
                   {r === 'All' ? 'Any' : r}
@@ -198,7 +198,7 @@ function ExploreContent() {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
                 openNowOnly
                   ? 'bg-emerald-700 text-white border-emerald-800 shadow-sm'
-                  : 'bg-white/80 text-stone-600 border-stone-200/60 hover:bg-white'
+                  : 'bg-white/45 backdrop-blur-md text-stone-700 border-white/60 hover:bg-white/65'
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${openNowOnly ? 'bg-white' : 'bg-emerald-500'}`} />
@@ -233,12 +233,12 @@ function ExploreContent() {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="glass-card rounded-2xl h-80 animate-pulse bg-white/40" />
+            <div key={i} className="glass-card rounded-2xl h-80 animate-pulse bg-white/25" />
           ))}
         </div>
       ) : filteredCafes.length === 0 ? (
         <div className="glass-panel rounded-2xl py-16 px-6 text-center space-y-3 max-w-lg mx-auto">
-          <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
+          <div className="w-12 h-12 rounded-full bg-white/40 backdrop-blur-md border border-white/60 flex items-center justify-center mx-auto text-stone-400">
             <Search className="w-5 h-5" />
           </div>
           <h3 className="font-serif font-bold text-lg text-[#181514]">No cafes found</h3>
@@ -267,7 +267,7 @@ function ExploreContent() {
       )}
 
       {/* 6. SUBTLE FOOTNOTE ABOUT REAL SEED DATA */}
-      <div className="pt-8 border-t border-stone-200/50 text-center text-[11px] text-stone-400 font-mono">
+      <div className="pt-8 border-t border-stone-200/40 text-center text-[11px] text-stone-400 font-mono">
         Directory listings for Ghaziabad & Delhi NCR curated as verified community seed data.
       </div>
     </div>

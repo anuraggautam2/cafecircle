@@ -251,7 +251,7 @@ export default function CafeDetailsPage() {
 
           {/* Funding Progress Bar & Key Numbers */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
-            <div className="p-3.5 rounded-xl bg-white/70 border border-white/90">
+            <div className="p-3.5 rounded-xl bg-white/45 backdrop-blur-md border border-white/60">
               <div className="text-[10px] uppercase text-stone-400">Raised so far</div>
               <div className="text-lg font-bold text-stone-900 mt-0.5">
                 ₹{(activeCampaign.raisedAmount / 100000).toFixed(2)}L
@@ -259,19 +259,19 @@ export default function CafeDetailsPage() {
               <div className="text-[10px] text-stone-500">of ₹{(activeCampaign.targetAmount / 100000).toFixed(2)}L target</div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-white/70 border border-white/90">
+            <div className="p-3.5 rounded-xl bg-white/45 backdrop-blur-md border border-white/60">
               <div className="text-[10px] uppercase text-stone-400">Community Backers</div>
               <div className="text-lg font-bold text-stone-900 mt-0.5">{activeCampaign.investorCount}</div>
               <div className="text-[10px] text-stone-500">co-growth advocates</div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-white/70 border border-white/90">
+            <div className="p-3.5 rounded-xl bg-white/45 backdrop-blur-md border border-white/60">
               <div className="text-[10px] uppercase text-stone-400">Min. Ticket</div>
               <div className="text-lg font-bold text-stone-900 mt-0.5">₹{activeCampaign.minInvestment.toLocaleString('en-IN')}</div>
               <div className="text-[10px] text-stone-500">simulated educational round</div>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-white/70 border border-white/90">
+            <div className="p-3.5 rounded-xl bg-white/45 backdrop-blur-md border border-white/60">
               <div className="text-[10px] uppercase text-stone-400">Return Cap</div>
               <div className="text-lg font-bold text-emerald-700 mt-0.5">1.30x – 1.35x</div>
               <div className="text-[10px] text-emerald-800/80">quarterly revenue share</div>
@@ -367,15 +367,15 @@ export default function CafeDetailsPage() {
                   Cafe Highlights
                 </h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
-                  <div className="p-3 rounded-xl bg-white/70 border border-white/90">
+                  <div className="p-3 rounded-xl bg-white/45 backdrop-blur-md border border-white/60">
                     <div className="text-stone-400 font-mono text-[10px] uppercase">Cuisine</div>
                     <div className="font-medium text-stone-900 mt-0.5">{cafe.cuisine || 'Continental & Bakes'}</div>
                   </div>
-                  <div className="p-3 rounded-xl bg-white/70 border border-white/90">
+                  <div className="p-3 rounded-xl bg-white/45 backdrop-blur-md border border-white/60">
                     <div className="text-stone-400 font-mono text-[10px] uppercase">Established</div>
                     <div className="font-medium text-stone-900 mt-0.5">{cafe.establishedYear || '2021'}</div>
                   </div>
-                  <div className="p-3 rounded-xl bg-white/70 border border-white/90">
+                  <div className="p-3 rounded-xl bg-white/45 backdrop-blur-md border border-white/60">
                     <div className="text-stone-400 font-mono text-[10px] uppercase">Pricing</div>
                     <div className="font-medium text-stone-900 mt-0.5">{cafe.priceForTwo || '₹800 for two'}</div>
                   </div>
@@ -393,7 +393,7 @@ export default function CafeDetailsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {cafe.branches && cafe.branches.length > 0 ? (
                   cafe.branches.map((b: any) => (
-                    <div key={b.id} className="p-4 rounded-xl bg-white/70 border border-white/90 space-y-1.5 text-xs">
+                    <div key={b.id} className="p-4 rounded-xl bg-white/45 backdrop-blur-md border border-white/60 space-y-1.5 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-stone-900">{b.name}</span>
                         <span
@@ -416,7 +416,7 @@ export default function CafeDetailsPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="p-4 rounded-xl bg-white/70 border border-white/90 text-xs text-stone-500">
+                  <div className="p-4 rounded-xl bg-white/45 backdrop-blur-md border border-white/60 text-xs text-stone-500">
                     Primary location: {cafe.address}, {cafe.city}
                   </div>
                 )}
@@ -439,7 +439,7 @@ export default function CafeDetailsPage() {
               <div className="space-y-3 pt-1">
                 {cafe.reviews && cafe.reviews.length > 0 ? (
                   cafe.reviews.map((rev: any) => (
-                    <div key={rev.id} className="p-4 rounded-xl bg-white/70 border border-white/90 space-y-1.5 text-xs">
+                    <div key={rev.id} className="p-4 rounded-xl bg-white/45 backdrop-blur-md border border-white/60 space-y-1.5 text-xs">
                       <div className="flex items-center justify-between">
                         <span className="font-bold text-stone-900">{rev.user?.name || 'Verified Diner'}</span>
                         <div className="flex items-center gap-0.5 text-amber-500 font-semibold">
@@ -467,7 +467,7 @@ export default function CafeDetailsPage() {
               </h3>
               <div className="space-y-2">
                 {cafe.documents?.map((doc: any) => (
-                  <div key={doc.id} className="p-3.5 rounded-xl bg-white/70 border border-white/90 flex items-center justify-between text-xs">
+                  <div key={doc.id} className="p-3.5 rounded-xl bg-white/45 backdrop-blur-md border border-white/60 flex items-center justify-between text-xs">
                     <div className="flex items-center gap-3">
                       <FileText className="w-4 h-4 text-[#B84A22]" />
                       <div>

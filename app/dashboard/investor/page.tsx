@@ -120,7 +120,7 @@ export default function InvestorDashboardPage() {
 
                   <Link
                     href={`/campaigns/${inv.campaign?.slug || inv.campaignId}`}
-                    className="p-2 rounded-xl border border-stone-200 bg-white/80 hover:bg-white text-stone-800 transition-colors shadow-sm"
+                    className="p-2 rounded-xl border border-white/60 bg-white/40 backdrop-blur-md hover:bg-white/60 text-stone-800 transition-colors shadow-sm"
                     title="View Cafe Details"
                   >
                     <ArrowRight className="w-4 h-4 text-stone-500" />

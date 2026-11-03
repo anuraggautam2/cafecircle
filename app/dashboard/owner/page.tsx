@@ -198,8 +198,8 @@ export default function CafeOwnerDashboardPage() {
           }}
           className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
             showUpdateForm
-              ? 'bg-[#181514] text-white border-[#181514]'
-              : 'bg-white text-[#181514] border-[#EAE6DE] hover:bg-[#F5F2EB]'
+              ? 'bg-[#2C1810] text-white border-[#2C1810] shadow-sm'
+              : 'bg-white/45 backdrop-blur-md text-[#181514] border-white/60 hover:bg-white/65'
           }`}
         >
           {showUpdateForm ? 'Close Update Form' : '+ Post Update'}
@@ -212,8 +212,8 @@ export default function CafeOwnerDashboardPage() {
           }}
           className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
             showFinancialForm
-              ? 'bg-[#181514] text-white border-[#181514]'
-              : 'bg-white text-[#181514] border-[#EAE6DE] hover:bg-[#F5F2EB]'
+              ? 'bg-[#2C1810] text-white border-[#2C1810] shadow-sm'
+              : 'bg-white/45 backdrop-blur-md text-[#181514] border-white/60 hover:bg-white/65'
           }`}
         >
           {showFinancialForm ? 'Close Revenue Form' : '+ Report Revenue'}
@@ -222,7 +222,7 @@ export default function CafeOwnerDashboardPage() {
 
       {/* Collapsible Update Form */}
       {showUpdateForm && (
-        <form onSubmit={handlePublishUpdate} className="p-5 rounded-xl bg-white border border-[#EAE6DE] space-y-3 text-xs">
+        <form onSubmit={handlePublishUpdate} className="p-5 rounded-2xl glass-panel space-y-3 text-xs">
           <div className="font-serif font-bold text-sm text-[#181514]">Broadcast Update to Backers</div>
           <div>
             <input
@@ -257,7 +257,7 @@ export default function CafeOwnerDashboardPage() {
 
       {/* Collapsible Financial Form */}
       {showFinancialForm && (
-        <form onSubmit={handlePublishFinancial} className="p-5 rounded-xl bg-white border border-[#EAE6DE] space-y-3 text-xs">
+        <form onSubmit={handlePublishFinancial} className="p-5 rounded-2xl glass-panel space-y-3 text-xs">
           <div className="font-serif font-bold text-sm text-[#181514]">Submit Monthly Revenue Disclosure</div>
           <div className="grid grid-cols-2 gap-3">
             <input
@@ -294,7 +294,7 @@ export default function CafeOwnerDashboardPage() {
           Recent Activity
         </h2>
 
-        <div className="bg-white border border-[#EAE6DE] rounded-xl divide-y divide-[#F5F2EB] overflow-hidden text-xs">
+        <div className="glass-panel rounded-2xl divide-y divide-stone-200/40 overflow-hidden text-xs">
           {recentActivity.map((act, idx) => (
             <div key={idx} className="p-4 flex items-center justify-between text-[#181514]">
               <div>

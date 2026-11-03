@@ -26,7 +26,7 @@ export default function HowItWorksPage() {
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-12 space-y-12">
       {/* Header */}
-      <div className="border-b border-stone-200/50 pb-6 space-y-2">
+      <div className="border-b border-stone-200/40 pb-6 space-y-2">
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#181514]">
           How CafeCircle Works
         </h1>
@@ -35,10 +35,10 @@ export default function HowItWorksPage() {
         </p>
       </div>
 
-      {/* 3 Step Process (Glass Cards) */}
+      {/* 3 Step Process (Transparent Glass Panels) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs">
         <div className="glass-panel p-6 space-y-2.5">
-          <div className="font-mono text-xs font-bold text-[#B84A22] bg-amber-100/70 px-2 py-0.5 rounded border border-amber-300/60 inline-block">
+          <div className="font-mono text-xs font-bold text-[#2C1810] bg-white/50 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/70 inline-block shadow-2xs">
             01 • DISCOVER
           </div>
           <h2 className="font-serif font-bold text-base text-[#181514]">
@@ -50,7 +50,7 @@ export default function HowItWorksPage() {
         </div>
 
         <div className="glass-panel p-6 space-y-2.5">
-          <div className="font-mono text-xs font-bold text-[#B84A22] bg-amber-100/70 px-2 py-0.5 rounded border border-amber-300/60 inline-block">
+          <div className="font-mono text-xs font-bold text-[#2C1810] bg-white/50 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/70 inline-block shadow-2xs">
             02 • CONTRIBUTE
           </div>
           <h2 className="font-serif font-bold text-base text-[#181514]">
@@ -62,7 +62,7 @@ export default function HowItWorksPage() {
         </div>
 
         <div className="glass-panel p-6 space-y-2.5">
-          <div className="font-mono text-xs font-bold text-[#B84A22] bg-amber-100/70 px-2 py-0.5 rounded border border-amber-300/60 inline-block">
+          <div className="font-mono text-xs font-bold text-[#2C1810] bg-white/50 backdrop-blur-md px-2.5 py-1 rounded-md border border-white/70 inline-block shadow-2xs">
             03 • ADVOCATE
           </div>
           <h2 className="font-serif font-bold text-base text-[#181514]">
@@ -75,12 +75,12 @@ export default function HowItWorksPage() {
       </div>
 
       {/* Frequently Asked Questions */}
-      <div className="space-y-4 pt-4 border-t border-stone-200/50">
+      <div className="space-y-4 pt-4 border-t border-stone-200/40">
         <h2 className="font-serif text-xl font-bold text-[#181514]">
           Frequently Asked Questions
         </h2>
 
-        <div className="divide-y divide-stone-200/50 glass-panel overflow-hidden text-xs">
+        <div className="divide-y divide-stone-200/40 glass-panel overflow-hidden text-xs">
           {faqs.map((faq, idx) => (
             <div key={idx} className="p-4 space-y-2">
               <button
