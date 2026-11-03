@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -41,6 +43,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid entity type' }, { status: 400 });
   } catch (error: any) {
     console.error('Error in admin verify:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Internal server error' }, { status: 500 });
   }
 }

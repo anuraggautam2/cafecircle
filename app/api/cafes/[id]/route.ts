@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } | Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const resolvedParams = await Promise.resolve(params);
+    const id = resolvedParams?.id;
+
+    if (!id) {
+      return NextResponse.json({ error: 'Cafe ID or slug is required' }, { status: 400 });
+    }
 
     const cafe = await prisma.cafe.findFirst({
       where: {
@@ -49,12 +56,23 @@ export async function GET(
       return NextResponse.json({ error: 'Cafe not found' }, { status: 404 });
     }
 
+    let parsedImages: string[] = [];
+    try {
+      if (typeof cafe.images === 'string') {
+        parsedImages = JSON.parse(cafe.images);
+      } else if (Array.isArray(cafe.images)) {
+        parsedImages = cafe.images;
+      }
+    } catch {
+      parsedImages = [];
+    }
+
     return NextResponse.json({
       ...cafe,
-      images: JSON.parse(cafe.images || '[]'),
+      images: parsedImages,
     });
   } catch (error: any) {
     console.error('Error fetching cafe detail:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Internal server error' }, { status: 500 });
   }
 }

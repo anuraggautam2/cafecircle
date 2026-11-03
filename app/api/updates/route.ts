@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -37,29 +39,24 @@ export async function POST(request: Request) {
     });
 
     if (cafe) {
-      const investorUserIds = new Set<string>();
-      cafe.campaigns.forEach((camp) => {
-        camp.investments.forEach((inv) => {
-          investorUserIds.add(inv.investor.userId);
-        });
-      });
-
-      for (const userId of Array.from(investorUserIds)) {
-        await prisma.notification.create({
-          data: {
-            userId,
-            title: `📢 Update from ${cafe.name}`,
-            message: title,
-            type: 'UPDATE',
-            link: `/cafes/${cafe.slug}`,
-          },
-        });
+      for (const camp of cafe.campaigns) {
+        for (const inv of camp.investments) {
+          await prisma.notification.create({
+            data: {
+              userId: inv.investor.userId,
+              title: `Update from ${cafe.name}`,
+              message: `${title}: ${content.slice(0, 100)}...`,
+              type: 'UPDATE',
+              link: `/cafes/${cafe.slug || cafe.id}`,
+            },
+          });
+        }
       }
     }
 
     return NextResponse.json(update, { status: 201 });
   } catch (error: any) {
     console.error('Error creating business update:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Internal server error' }, { status: 500 });
   }
 }

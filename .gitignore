@@ -21,8 +21,7 @@ yarn-error.log*
 # Local environment
 .env*.local
 
-# SQLite database files
-prisma/*.db
+# SQLite database journal files
 prisma/*.db-journal
 
 # TypeScript build info
