@@ -1,0 +1,80 @@
+'use client';
+
+import React from 'react';
+import Link from 'next/link';
+import { MapPin } from 'lucide-react';
+import { Campaign } from '@/lib/types';
+
+interface CampaignCardProps {
+  campaign: Campaign;
+  onInvestClick?: (campaign: Campaign) => void;
+}
+
+export default function CampaignCard({ campaign }: CampaignCardProps) {
+  const percentFunded = Math.min(
+    100,
+    Math.round((campaign.raisedAmount / campaign.targetAmount) * 100)
+  );
+
+  const formatLakhs = (amount: number) => {
+    return `₹${(amount / 100000).toFixed(2)}L`;
+  };
+
+  return (
+    <div className="glass-card overflow-hidden flex flex-col group">
+      {/* 1. Large Focus Photography */}
+      <Link href={`/campaigns/${campaign.slug || campaign.id}`} className="block relative aspect-[16/10] overflow-hidden bg-stone-100">
+        <img
+          src={campaign.cafe?.coverImage || 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80'}
+          alt={campaign.title}
+          className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
+        />
+        <div className="absolute top-3 right-3">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-mono font-medium bg-white/85 backdrop-blur-md text-stone-900 border border-white/60 shadow-sm">
+            {percentFunded}% funded
+          </span>
+        </div>
+      </Link>
+
+      {/* 2. Focused Cafe Information */}
+      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+        <div>
+          {/* Cafe Name & Location */}
+          <div className="space-y-1">
+            <Link href={`/cafes/${campaign.cafe?.slug || campaign.cafeId}`}>
+              <h3 className="font-serif font-bold text-base text-[#181514] hover:text-[#B84A22] transition-colors line-clamp-1">
+                {campaign.cafe?.name}
+              </h3>
+            </Link>
+            <div className="flex items-center gap-1.5 text-xs text-stone-500">
+              <MapPin className="w-3.5 h-3.5 text-[#B84A22] shrink-0" />
+              <span className="truncate">{campaign.expansionArea}, {campaign.expansionCity}</span>
+            </div>
+          </div>
+
+          {/* Thin Progress Line */}
+          <div className="mt-4 space-y-1.5">
+            <div className="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
+              <div
+                className="bg-[#B84A22] h-full rounded-full transition-all duration-300"
+                style={{ width: `${percentFunded}%` }}
+              />
+            </div>
+            <div className="flex items-baseline justify-between text-xs font-mono text-stone-800">
+              <span className="font-semibold">{formatLakhs(campaign.raisedAmount)}</span>
+              <span className="text-stone-400">Goal: {formatLakhs(campaign.targetAmount)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3. One Clear View Cafe / Campaign Button */}
+        <Link
+          href={`/campaigns/${campaign.slug || campaign.id}`}
+          className="w-full text-center py-2.5 px-3 rounded-xl text-xs font-semibold bg-[#181514] hover:bg-stone-800 text-white transition-colors shadow-sm"
+        >
+          View Cafe & Terms
+        </Link>
+      </div>
+    </div>
+  );
+}
