@@ -208,7 +208,7 @@ export default function CampaignDetailsPage() {
           <div className="pt-2 space-y-2" id="invest">
             <button
               onClick={() => setInvestModalOpen(true)}
-              className="w-full py-3 px-4 rounded-lg text-sm font-semibold bg-[#181514] hover:bg-[#262220] text-white transition-colors shadow-sm"
+              className="btn-primary w-full py-3 px-4 text-sm shadow-sm"
             >
               Back This Expansion (Simulated)
             </button>

@@ -5,13 +5,14 @@
 :root {
   --background: #FAF7F2;
   --foreground: #181514;
+  --coffee-brown: #2C1810;
 }
 
 body {
   background-color: var(--background);
-  background: radial-gradient(circle at 10% 10%, rgba(245, 237, 224, 0.7) 0%, transparent 45%),
-              radial-gradient(circle at 90% 20%, rgba(238, 227, 211, 0.6) 0%, transparent 50%),
-              radial-gradient(circle at 50% 85%, rgba(246, 240, 230, 0.7) 0%, transparent 50%),
+  background: radial-gradient(ellipse at 15% 0%, rgba(246, 238, 226, 0.85) 0%, transparent 55%),
+              radial-gradient(ellipse at 85% 10%, rgba(242, 232, 218, 0.75) 0%, transparent 55%),
+              radial-gradient(circle at 50% 90%, rgba(248, 241, 230, 0.8) 0%, transparent 60%),
               #FAF7F2;
   background-attachment: fixed;
   color: var(--foreground);
@@ -27,64 +28,65 @@ body {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(243, 239, 231, 0.6);
+  background: rgba(243, 239, 231, 0.5);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(213, 204, 190, 0.8);
+  background: rgba(213, 204, 190, 0.7);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(163, 156, 149, 0.9);
 }
 
-/* Glassmorphism Card System */
-.glass-card {
+/* Floating Glassmorphism Navigation */
+.glass-nav {
   background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 8px 32px -4px rgba(44, 24, 16, 0.05), 0 2px 8px -2px rgba(44, 24, 16, 0.02);
+}
+
+/* Transparent Glass Card System */
+.glass-card {
+  background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 4px 24px -4px rgba(44, 24, 16, 0.05), 0 1px 3px rgba(44, 24, 16, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 20px -2px rgba(44, 24, 16, 0.04), 0 1px 3px rgba(44, 24, 16, 0.02);
   border-radius: 1.25rem;
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.85);
   border-color: rgba(255, 255, 255, 1);
   transform: translateY(-3px);
-  box-shadow: 0 16px 36px -6px rgba(44, 24, 16, 0.09), 0 4px 10px -2px rgba(44, 24, 16, 0.03);
+  box-shadow: 0 16px 36px -6px rgba(44, 24, 16, 0.08), 0 4px 12px -2px rgba(44, 24, 16, 0.03);
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.68);
+  background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow: 0 4px 20px -2px rgba(44, 24, 16, 0.04), 0 2px 6px -1px rgba(44, 24, 16, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 24px -4px rgba(44, 24, 16, 0.04), 0 1px 3px rgba(44, 24, 16, 0.02);
   border-radius: 1.25rem;
 }
 
-.glass-nav {
-  background: rgba(250, 247, 242, 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(226, 218, 205, 0.6);
-  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.03);
-}
-
 .glass-input {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 218, 205, 0.8);
+  border: 1px solid rgba(226, 218, 205, 0.7);
   border-radius: 0.875rem;
   transition: all 0.2s ease;
 }
 
 .glass-input:focus {
   background: rgba(255, 255, 255, 0.95);
-  border-color: #181514;
-  box-shadow: 0 0 0 3px rgba(24, 21, 20, 0.06);
+  border-color: #2C1810;
+  box-shadow: 0 0 0 3px rgba(44, 24, 16, 0.06);
   outline: none;
 }
 
@@ -92,30 +94,83 @@ body {
   background: rgba(255, 255, 255, 0.65);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(226, 218, 205, 0.7);
+  border: 1px solid rgba(226, 218, 205, 0.65);
   border-radius: 9999px;
   transition: all 0.2s ease;
 }
 
 .glass-pill:hover {
   background: rgba(255, 255, 255, 0.9);
-  border-color: #181514;
+  border-color: #2C1810;
 }
 
-/* Legacy utility preservation */
+/* Button System: Coffee Brown Primary & Transparent Secondary */
+.btn-primary {
+  background-color: #2C1810;
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(44, 24, 16, 0.12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary:hover {
+  background-color: #1A0E09;
+  box-shadow: 0 4px 12px rgba(44, 24, 16, 0.18);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background-color: rgba(255, 255, 255, 0.65);
+  color: #2C1810;
+  font-weight: 600;
+  border: 1px solid rgba(226, 218, 205, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-color: #2C1810;
+  box-shadow: 0 4px 12px rgba(44, 24, 16, 0.06);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+/* Compatibility classes */
 .stripe-card {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.68);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 1.25rem;
-  box-shadow: 0 2px 12px rgba(24, 21, 20, 0.04);
-  transition: all 0.2s ease;
+  box-shadow: 0 2px 12px rgba(24, 21, 20, 0.03);
+  transition: all 0.25s ease;
 }
 
 .stripe-card:hover {
   border-color: rgba(255, 255, 255, 1);
-  box-shadow: 0 8px 24px -4px rgba(24, 21, 20, 0.07);
+  box-shadow: 0 8px 24px -4px rgba(24, 21, 20, 0.06);
 }
 
 .metric-pill {

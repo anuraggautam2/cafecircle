@@ -134,7 +134,7 @@ export default function GrowthEnginePage() {
             />
             <button
               onClick={copyLink}
-              className="py-2 px-4 rounded-lg text-xs font-semibold bg-[#181514] text-white hover:bg-[#262220] transition-colors flex items-center gap-1.5 shrink-0 shadow-sm"
+              className="btn-primary py-2 px-4 text-xs flex items-center gap-1.5 shrink-0 shadow-sm"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               {copied ? 'Copied' : 'Copy Link'}
@@ -195,7 +195,7 @@ export default function GrowthEnginePage() {
             <button
               onClick={() => triggerSimulation('CONVERT_VISIT', false)}
               disabled={simulating}
-              className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-[#181514] hover:bg-[#262220] text-white transition-colors"
+              className="btn-primary px-3.5 py-1.5 text-xs shadow-sm"
             >
               ☕ Simulate Friend Visiting Cafe (+40 pts)
             </button>

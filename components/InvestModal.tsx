@@ -164,7 +164,7 @@ export default function InvestModal({ campaign, isOpen, onClose, onSuccess }: In
                 type="button"
                 onClick={() => setStep(2)}
                 disabled={amount < campaign.minInvestment}
-                className="w-full py-3 px-4 rounded-lg font-semibold bg-[#181514] text-white hover:bg-[#262220] transition-colors flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 text-xs"
+                className="btn-primary w-full py-3 px-4 flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 text-xs"
               >
                 Review Digital Term Sheet & Disclosures
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -209,7 +209,7 @@ export default function InvestModal({ campaign, isOpen, onClose, onSuccess }: In
                   type="button"
                   onClick={() => setStep(3)}
                   disabled={!termsAccepted}
-                  className="flex-1 py-2.5 px-4 rounded-lg font-semibold bg-[#181514] text-white hover:bg-[#262220] transition-colors flex items-center justify-center gap-2 text-xs disabled:opacity-50"
+                  className="btn-primary flex-1 py-2.5 px-4 flex items-center justify-center gap-2 text-xs disabled:opacity-50 shadow-sm"
                 >
                   Confirm & Proceed
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -284,7 +284,7 @@ export default function InvestModal({ campaign, isOpen, onClose, onSuccess }: In
                   type="button"
                   onClick={handleConfirmInvestment}
                   disabled={isSubmitting}
-                  className="flex-1 py-2.5 px-4 rounded-lg font-semibold bg-[#181514] text-white hover:bg-[#262220] transition-colors flex items-center justify-center gap-2 text-xs disabled:opacity-50"
+                  className="btn-primary flex-1 py-2.5 px-4 flex items-center justify-center gap-2 text-xs disabled:opacity-50 shadow-sm"
                 >
                   {isSubmitting ? 'Issuing Term Sheet...' : 'Execute Simulated Agreement'}
                 </button>
@@ -346,7 +346,7 @@ export default function InvestModal({ campaign, isOpen, onClose, onSuccess }: In
                   />
                   <button
                     onClick={copyToClipboard}
-                    className="py-2 px-3 rounded-lg text-xs font-semibold bg-[#181514] text-white hover:bg-[#262220] transition-colors flex items-center gap-1.5 shrink-0"
+                    className="btn-primary py-2 px-3 text-xs flex items-center gap-1.5 shrink-0 shadow-sm"
                   >
                     {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     {copied ? 'Copied' : 'Copy'}
@@ -357,7 +357,7 @@ export default function InvestModal({ campaign, isOpen, onClose, onSuccess }: In
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-2.5 px-4 rounded-lg font-semibold bg-[#181514] text-white hover:bg-[#262220] text-xs transition-colors"
+                className="btn-primary w-full py-2.5 px-4 text-xs shadow-sm"
               >
                 Go to Investor Dashboard
               </button>

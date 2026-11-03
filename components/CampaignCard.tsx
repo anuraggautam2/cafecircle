@@ -21,7 +21,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
   };
 
   return (
-    <div className="glass-card overflow-hidden flex flex-col group">
+    <div className="glass-card rounded-2xl overflow-hidden flex flex-col group transition-all duration-300">
       {/* 1. Large Focus Photography */}
       <Link href={`/campaigns/${campaign.slug || campaign.id}`} className="block relative aspect-[16/10] overflow-hidden bg-stone-100">
         <img
@@ -30,7 +30,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-out"
         />
         <div className="absolute top-3 right-3">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-mono font-medium bg-white/85 backdrop-blur-md text-stone-900 border border-white/60 shadow-sm">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-mono font-medium bg-white/85 backdrop-blur-md text-[#181514] border border-white/60 shadow-sm">
             {percentFunded}% funded
           </span>
         </div>
@@ -42,7 +42,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           {/* Cafe Name & Location */}
           <div className="space-y-1">
             <Link href={`/cafes/${campaign.cafe?.slug || campaign.cafeId}`}>
-              <h3 className="font-serif font-bold text-base text-[#181514] hover:text-[#B84A22] transition-colors line-clamp-1">
+              <h3 className="font-serif font-bold text-base text-[#181514] group-hover:text-[#B84A22] transition-colors line-clamp-1">
                 {campaign.cafe?.name}
               </h3>
             </Link>
@@ -56,7 +56,7 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           <div className="mt-4 space-y-1.5">
             <div className="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
               <div
-                className="bg-[#B84A22] h-full rounded-full transition-all duration-300"
+                className="bg-[#2C1810] h-full rounded-full transition-all duration-300"
                 style={{ width: `${percentFunded}%` }}
               />
             </div>
@@ -67,10 +67,10 @@ export default function CampaignCard({ campaign }: CampaignCardProps) {
           </div>
         </div>
 
-        {/* 3. One Clear View Cafe / Campaign Button */}
+        {/* 3. One Clear View Cafe / Campaign Button (Coffee Brown Primary Button) */}
         <Link
           href={`/campaigns/${campaign.slug || campaign.id}`}
-          className="w-full text-center py-2.5 px-3 rounded-xl text-xs font-semibold bg-[#181514] hover:bg-stone-800 text-white transition-colors shadow-sm"
+          className="btn-primary w-full text-center py-2.5 px-3 text-xs block shadow-sm"
         >
           View Cafe & Terms
         </Link>

@@ -1,16 +1,20 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Cafe } from '@/lib/types';
 import CafeCard from '@/components/CafeCard';
 import { Search, MapPin, SlidersHorizontal, Star, Check } from 'lucide-react';
 
-export default function ExplorePage() {
+function ExploreContent() {
+  const searchParams = useSearchParams();
+  const urlSearch = searchParams.get('search') || '';
+
   const [cafes, setCafes] = useState<Cafe[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filter states
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState(urlSearch);
   const [selectedLocation, setSelectedLocation] = useState('All');
   const [selectedCuisine, setSelectedCuisine] = useState('All');
   const [selectedRating, setSelectedRating] = useState('All');
@@ -19,6 +23,12 @@ export default function ExplorePage() {
   const locations = ['All', 'Ghaziabad', 'Delhi NCR', 'Raj Nagar', 'Indirapuram', 'Vaishali', 'Connaught Place'];
   const cuisines = ['All', 'Specialty Coffee', 'European Bakery', 'Continental', 'Italian', 'Chai', 'Modern Indian'];
   const ratings = ['All', '4.0+', '4.3+', '4.5+'];
+
+  useEffect(() => {
+    if (urlSearch) {
+      setSearch(urlSearch);
+    }
+  }, [urlSearch]);
 
   useEffect(() => {
     setLoading(true);
@@ -96,7 +106,7 @@ export default function ExplorePage() {
 
         {/* 2. SEARCH BAR & LOCATION SELECTOR (Glass Container) */}
         <div className="pt-4 max-w-2xl mx-auto">
-          <div className="glass-panel p-2 sm:p-2.5 flex flex-col sm:flex-row items-center gap-2">
+          <div className="glass-panel p-2 sm:p-2.5 flex flex-col sm:flex-row items-center gap-2 shadow-sm">
             {/* Search Input */}
             <div className="relative flex-1 w-full">
               <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -105,7 +115,7 @@ export default function ExplorePage() {
                 placeholder="Search by cafe name, cuisine, or street..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 text-xs text-[#181514] bg-white/80 border border-stone-200/60 rounded-xl placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-stone-900/5 focus:bg-white transition-all"
+                className="w-full pl-10 pr-3 py-2 text-xs text-[#181514] bg-white/80 border border-stone-200/60 rounded-xl placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#2C1810]/10 focus:bg-white transition-all"
               />
             </div>
 
@@ -131,7 +141,7 @@ export default function ExplorePage() {
       </div>
 
       {/* 3. FILTERS BAR (Cuisine, Rating, Open Now) */}
-      <div className="glass-panel p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="glass-panel p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm">
         {/* Left: Cuisine Pills */}
         <div className="space-y-1">
           <div className="text-[11px] font-mono uppercase tracking-wider text-stone-500">
@@ -144,7 +154,7 @@ export default function ExplorePage() {
                 onClick={() => setSelectedCuisine(c)}
                 className={`px-3 py-1.5 rounded-full text-xs whitespace-nowrap transition-all ${
                   selectedCuisine === c
-                    ? 'bg-[#181514] text-white font-medium shadow-sm'
+                    ? 'bg-[#2C1810] text-white font-medium shadow-sm'
                     : 'bg-white/80 text-stone-600 border border-stone-200/60 hover:bg-white hover:text-stone-900'
                 }`}
               >
@@ -168,7 +178,7 @@ export default function ExplorePage() {
                   onClick={() => setSelectedRating(r)}
                   className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
                     selectedRating === r
-                      ? 'bg-amber-600 text-white shadow-sm'
+                      ? 'bg-[#2C1810] text-white shadow-sm'
                       : 'bg-white/80 text-stone-600 border border-stone-200/60 hover:bg-white'
                   }`}
                 >
@@ -223,11 +233,11 @@ export default function ExplorePage() {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="glass-card h-80 animate-pulse bg-white/40" />
+            <div key={i} className="glass-card rounded-2xl h-80 animate-pulse bg-white/40" />
           ))}
         </div>
       ) : filteredCafes.length === 0 ? (
-        <div className="glass-panel py-16 px-6 text-center space-y-3 max-w-lg mx-auto">
+        <div className="glass-panel rounded-2xl py-16 px-6 text-center space-y-3 max-w-lg mx-auto">
           <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto text-stone-400">
             <Search className="w-5 h-5" />
           </div>
@@ -243,7 +253,7 @@ export default function ExplorePage() {
               setSelectedRating('All');
               setOpenNowOnly(false);
             }}
-            className="mt-2 px-4 py-2 rounded-xl text-xs font-semibold bg-[#181514] text-white hover:bg-stone-800 transition-colors"
+            className="btn-primary mt-2 px-5 py-2.5 text-xs shadow-sm"
           >
             Clear All Filters
           </button>
@@ -261,5 +271,13 @@ export default function ExplorePage() {
         Directory listings for Ghaziabad & Delhi NCR curated as verified community seed data.
       </div>
     </div>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 py-16 text-center text-xs text-stone-500 font-mono">Loading explore directory...</div>}>
+      <ExploreContent />
+    </Suspense>
   );
 }

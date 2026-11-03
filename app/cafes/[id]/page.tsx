@@ -233,7 +233,7 @@ export default function CafeDetailsPage() {
             <div className="flex items-center gap-2.5 shrink-0">
               <Link
                 href={`/campaigns/${activeCampaign.slug || activeCampaign.id}`}
-                className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-white text-stone-800 border border-stone-200 hover:bg-stone-50 transition-colors shadow-sm"
+                className="btn-secondary px-4 py-2.5 text-xs shadow-sm"
               >
                 View Offering Pitch
               </Link>
@@ -242,7 +242,7 @@ export default function CafeDetailsPage() {
                   setSelectedCampaign(activeCampaign);
                   setInvestModalOpen(true);
                 }}
-                className="px-5 py-2.5 rounded-xl text-xs font-semibold bg-[#181514] text-white hover:bg-stone-800 transition-colors shadow-sm"
+                className="btn-primary px-5 py-2.5 text-xs shadow-sm"
               >
                 Back This Expansion (Simulated)
               </button>
@@ -551,7 +551,7 @@ export default function CafeDetailsPage() {
             <button
               onClick={handleSimulateReferralVisit}
               disabled={simulatingVisit}
-              className="w-full py-2.5 px-3 rounded-xl text-xs font-semibold bg-[#181514] text-white hover:bg-stone-800 transition-colors shadow-sm"
+              className="btn-primary w-full py-2.5 px-3 text-xs shadow-sm"
             >
               {simulatingVisit ? 'Recording...' : 'Simulate a Friend Visiting'}
             </button>

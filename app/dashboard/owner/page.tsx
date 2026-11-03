@@ -138,7 +138,7 @@ export default function CafeOwnerDashboardPage() {
         <div className="flex items-center gap-3">
           <Link
             href="/campaigns/create"
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[#181514] text-white hover:bg-stone-800 transition-colors shadow-sm"
+            className="btn-primary px-3.5 py-1.5 text-xs shadow-sm"
           >
             Launch Campaign
           </Link>

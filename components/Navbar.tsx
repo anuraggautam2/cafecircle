@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { UserRole } from '@/lib/types';
-import { ChevronDown, Check, Menu, X, Coffee } from 'lucide-react';
+import { ChevronDown, Check, Menu, X } from 'lucide-react';
 import SimulatedBadge from './SimulatedBadge';
 
 export default function Navbar() {
@@ -27,18 +27,18 @@ export default function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 glass-nav">
-      <SimulatedBadge variant="banner" />
-
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
+    <header className="sticky top-2.5 z-50 px-3 sm:px-6 max-w-6xl mx-auto w-full">
+      {/* Floating frosted glass capsule */}
+      <div className="glass-nav rounded-2xl px-4 sm:px-6 border border-white/80 shadow-sm">
         <div className="flex items-center justify-between h-14">
-          {/* Logo & Navigation */}
-          <div className="flex items-center gap-8">
-            <Link href="/" className="font-serif text-lg font-bold tracking-tight text-[#181514] flex items-center gap-1.5">
+          {/* Brand Logo & Core Nav */}
+          <div className="flex items-center gap-7">
+            <Link href="/" className="font-serif text-lg font-bold tracking-tight text-[#181514] flex items-center gap-1">
               <span>Cafe</span>
               <span className="text-[#B84A22]">Circle</span>
             </Link>
 
+            {/* Minimal Clean Navigation Links */}
             <nav className="hidden md:flex items-center gap-6 text-[13px] text-stone-600">
               <Link
                 href="/explore"
@@ -49,20 +49,20 @@ export default function Navbar() {
                 Discover Cafes
               </Link>
               <Link
-                href="/growth-engine"
-                className={`transition-colors hover:text-stone-900 ${
-                  pathname.startsWith('/growth-engine') ? 'text-[#181514] font-semibold' : ''
-                }`}
-              >
-                Growth Engine
-              </Link>
-              <Link
                 href="/how-it-works"
                 className={`transition-colors hover:text-stone-900 ${
                   pathname.startsWith('/how-it-works') ? 'text-[#181514] font-semibold' : ''
                 }`}
               >
                 How It Works
+              </Link>
+              <Link
+                href="/growth-engine"
+                className={`transition-colors hover:text-stone-900 ${
+                  pathname.startsWith('/growth-engine') ? 'text-[#181514] font-semibold' : ''
+                }`}
+              >
+                Growth Engine
               </Link>
 
               {role === 'INVESTOR' && (
@@ -98,21 +98,24 @@ export default function Navbar() {
             </nav>
           </div>
 
-          {/* Right Controls: Persona Switcher */}
-          <div className="flex items-center gap-3">
+          {/* Right Controls: Persona Switcher & Mobile Menu */}
+          <div className="flex items-center gap-2.5">
+            <SimulatedBadge variant="pill" className="hidden lg:inline-flex" />
+
+            {/* Persona Switcher Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setRoleDropdownOpen(!roleDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs text-[#181514] bg-white/80 border border-stone-200/80 hover:bg-white transition-all shadow-sm"
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs text-[#181514] bg-white/70 border border-stone-200/70 hover:bg-white transition-all shadow-sm"
               >
                 <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="text-stone-500 font-mono text-[11px]">{role.replace('_', ' ')}:</span>
+                <span className="text-stone-500 font-mono text-[11px] hidden sm:inline">{role.replace('_', ' ')}:</span>
                 <span className="font-semibold">{user?.name?.split(' ')[0]}</span>
                 <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
               </button>
 
               {roleDropdownOpen && (
-                <div className="absolute right-0 mt-1.5 w-56 rounded-2xl glass-panel p-1.5 z-50 shadow-xl border border-white/90">
+                <div className="absolute right-0 mt-2 w-56 rounded-2xl glass-panel p-1.5 z-50 shadow-xl border border-white/90">
                   <div className="px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider text-stone-400">
                     Switch Test Persona
                   </div>
@@ -127,13 +130,13 @@ export default function Navbar() {
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs text-left transition-all ${
                           isCurrent
-                            ? 'bg-stone-900 text-white font-medium shadow-sm'
+                            ? 'bg-[#2C1810] text-white font-medium shadow-sm'
                             : 'text-stone-700 hover:bg-white/80'
                         }`}
                       >
                         <div>
                           <div className={isCurrent ? 'text-white' : 'text-stone-900'}>{r.name}</div>
-                          <div className={`text-[10px] font-mono ${isCurrent ? 'text-stone-300' : 'text-stone-400'}`}>
+                          <div className={`text-[10px] font-mono ${isCurrent ? 'text-amber-200/80' : 'text-stone-400'}`}>
                             {r.roleLabel}
                           </div>
                         </div>
@@ -158,22 +161,25 @@ export default function Navbar() {
 
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-stone-200/50 glass-panel mx-3 my-2 p-3 space-y-1 text-xs">
-          <Link href="/explore" className="block py-2 px-3 rounded-lg hover:bg-white/70 text-stone-900 font-medium">
+        <div className="md:hidden mt-2 glass-panel p-3.5 rounded-2xl shadow-lg border border-white/80 space-y-1 text-xs">
+          <Link href="/explore" className="block py-2 px-3 rounded-xl hover:bg-white/70 text-stone-900 font-medium">
             Discover Cafes
           </Link>
-          <Link href="/growth-engine" className="block py-2 px-3 rounded-lg hover:bg-white/70 text-stone-900 font-medium">
-            Growth Engine
-          </Link>
-          <Link href="/how-it-works" className="block py-2 px-3 rounded-lg hover:bg-white/70 text-stone-900 font-medium">
+          <Link href="/how-it-works" className="block py-2 px-3 rounded-xl hover:bg-white/70 text-stone-900 font-medium">
             How It Works
           </Link>
-          <Link href="/dashboard/investor" className="block py-2 px-3 rounded-lg hover:bg-white/70 text-stone-900 font-medium">
+          <Link href="/growth-engine" className="block py-2 px-3 rounded-xl hover:bg-white/70 text-stone-900 font-medium">
+            Growth Engine
+          </Link>
+          <Link href="/dashboard/investor" className="block py-2 px-3 rounded-xl hover:bg-white/70 text-stone-900 font-medium">
             Investor Portfolio
           </Link>
-          <Link href="/dashboard/owner" className="block py-2 px-3 rounded-lg hover:bg-white/70 text-stone-900 font-medium">
+          <Link href="/dashboard/owner" className="block py-2 px-3 rounded-xl hover:bg-white/70 text-stone-900 font-medium">
             Cafe Owner Dashboard
           </Link>
+          <div className="pt-2 border-t border-stone-200/40 text-center">
+            <SimulatedBadge variant="pill" />
+          </div>
         </div>
       )}
     </header>

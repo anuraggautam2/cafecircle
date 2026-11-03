@@ -16,7 +16,7 @@ export default function CafeCard({ cafe }: CafeCardProps) {
   return (
     <Link
       href={`/cafes/${cafe.slug || cafe.id}`}
-      className="glass-card group overflow-hidden flex flex-col cursor-pointer block"
+      className="glass-card rounded-2xl group overflow-hidden flex flex-col cursor-pointer block transition-all duration-300 hover:-translate-y-1"
     >
       {/* 1. Cafe Photograph with subtle glass badge */}
       <div className="relative aspect-[16/11] overflow-hidden bg-[#F3EFE7]">
@@ -34,7 +34,7 @@ export default function CafeCard({ cafe }: CafeCardProps) {
           </span>
 
           {hasCampaign && (
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#181514]/80 backdrop-blur-md text-white shadow-sm">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-medium bg-[#2C1810]/85 backdrop-blur-md text-amber-100 shadow-sm border border-amber-500/20">
               Community Offering
             </span>
           )}
