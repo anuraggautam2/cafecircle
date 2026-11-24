@@ -10,34 +10,51 @@ export default function InvestorDashboardPage() {
   const { user } = useAuth();
   const [investments, setInvestments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [updates, setUpdates] = useState<any[]>([]);
+  const [loadingUpdates, setLoadingUpdates] = useState(true);
+  const [updatesError, setUpdatesError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`/api/investments?userId=${user?.id}`)
+    if (!user?.id) return;
+    setLoading(true);
+    fetch(`/api/investments?userId=${user.id}`, {
+      headers: {
+        'x-cafecircle-user-id': user.id,
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setInvestments(data);
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
+
+    // Fetch real database-backed updates from backed cafes
+    setLoadingUpdates(true);
+    setUpdatesError(null);
+    fetch(`/api/updates?userId=${user.id}`, {
+      headers: {
+        'x-cafecircle-user-id': user.id,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to load updates');
+        return res.json();
+      })
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setUpdates(data);
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching updates:', err);
+        setUpdatesError('Unable to load latest cafe updates.');
+      })
+      .finally(() => setLoadingUpdates(false));
   }, [user]);
 
   const totalInvested = investments.reduce((sum, i) => sum + (i.amount || 0), 0);
   const totalAccrued = investments.reduce((sum, i) => sum + (i.returnsAccrued || 0), 0);
-
-  const recentUpdates = [
-    {
-      cafeName: 'Roastery Coffee House',
-      title: 'Interior Masonry 70% Complete & Courtyard Koi Pond Installed',
-      date: '3 days ago',
-      link: '/cafes/roastery-coffee-house',
-    },
-    {
-      cafeName: 'Subko Specialty Coffee',
-      title: 'Loring S15 Kestrel Drum Roaster Docked at Mumbai Port',
-      date: '6 days ago',
-      link: '/cafes/subko-specialty-coffee',
-    },
-  ];
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-10">
@@ -134,28 +151,56 @@ export default function InvestorDashboardPage() {
 
       {/* 4. Recent Updates from Backed Cafes */}
       <div className="space-y-3">
-        <h2 className="font-serif text-lg font-bold text-[#181514]">
-          Recent Updates
-        </h2>
+        <div className="flex items-baseline justify-between">
+          <h2 className="font-serif text-lg font-bold text-[#181514]">
+            Recent Updates from Backed Cafes
+          </h2>
+          <span className="text-[11px] font-mono text-stone-400">Live feed</span>
+        </div>
 
         <div className="glass-panel rounded-2xl divide-y divide-stone-200/50 overflow-hidden">
-          {recentUpdates.map((update, idx) => (
-            <Link
-              key={idx}
-              href={update.link}
-              className="p-5 flex items-center justify-between gap-4 hover:bg-white/60 transition-colors group block"
-            >
-              <div className="space-y-1">
-                <div className="text-[11px] font-mono text-stone-400">
-                  {update.cafeName} • {update.date}
-                </div>
-                <div className="text-xs sm:text-sm font-medium text-[#181514] group-hover:text-[#B84A22] transition-colors">
-                  {update.title}
-                </div>
+          {loadingUpdates ? (
+            <div className="p-6 space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-14 rounded-xl bg-stone-200/40 animate-pulse" />
+              ))}
+            </div>
+          ) : updatesError ? (
+            <div className="p-6 text-center text-xs text-amber-800">
+              {updatesError}
+            </div>
+          ) : updates.length === 0 ? (
+            <div className="p-8 text-center text-xs text-stone-500 space-y-1">
+              <div>No recent updates posted from your backed cafes yet.</div>
+              <div className="text-[11px] text-stone-400">
+                When cafe operators broadcast progress updates or construction milestones, they will appear here.
               </div>
-              <ArrowRight className="w-4 h-4 text-stone-400 shrink-0 group-hover:translate-x-1 transition-transform" />
-            </Link>
-          ))}
+            </div>
+          ) : (
+            updates.map((update) => (
+              <Link
+                key={update.id}
+                href={`/cafes/${update.cafe?.slug || update.cafeId}`}
+                className="p-5 flex items-center justify-between gap-4 hover:bg-white/60 transition-colors group block"
+              >
+                <div className="space-y-1">
+                  <div className="text-[11px] font-mono text-stone-400">
+                    {update.cafe?.name || 'Backed Cafe'} • {new Date(update.createdAt).toLocaleDateString('en-IN', {
+                      day: 'numeric',
+                      month: 'short',
+                    })} • <span className="text-emerald-700 font-semibold">{update.milestoneTag || 'Progress'}</span>
+                  </div>
+                  <div className="text-xs sm:text-sm font-medium text-[#181514] group-hover:text-[#B84A22] transition-colors">
+                    {update.title}
+                  </div>
+                  <p className="text-xs text-stone-500 line-clamp-1 leading-relaxed">
+                    {update.content}
+                  </p>
+                </div>
+                <ArrowRight className="w-4 h-4 text-stone-400 shrink-0 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -72,6 +72,16 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function syncSessionCookie(user: UserSession | null) {
+  if (typeof document !== 'undefined') {
+    if (user?.id) {
+      document.cookie = `cc_user_id=${encodeURIComponent(user.id)}; path=/; SameSite=Lax; max-age=604800`;
+    } else {
+      document.cookie = 'cc_user_id=; path=/; max-age=0';
+    }
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<UserSession | null>(DEMO_USERS.INVESTOR);
   const [mounted, setMounted] = useState(false);
@@ -81,16 +91,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem('cafecircle_user');
     if (stored) {
       try {
-        setUser(JSON.parse(stored));
+        const parsed = JSON.parse(stored);
+        setUser(parsed);
+        syncSessionCookie(parsed);
       } catch (e) {
         setUser(DEMO_USERS.INVESTOR);
+        syncSessionCookie(DEMO_USERS.INVESTOR);
       }
+    } else {
+      syncSessionCookie(DEMO_USERS.INVESTOR);
     }
   }, []);
 
   const switchRole = (newRole: UserRole) => {
     const selected = DEMO_USERS[newRole];
     setUser(selected);
+    syncSessionCookie(selected);
     if (typeof window !== 'undefined') {
       localStorage.setItem('cafecircle_user', JSON.stringify(selected));
     }
@@ -101,6 +117,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const match = Object.values(DEMO_USERS).find((u) => u.email.toLowerCase() === email.toLowerCase());
     if (match) {
       setUser(match);
+      syncSessionCookie(match);
       localStorage.setItem('cafecircle_user', JSON.stringify(match));
       return;
     }
@@ -124,6 +141,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } : undefined,
     };
     setUser(newUser);
+    syncSessionCookie(newUser);
     localStorage.setItem('cafecircle_user', JSON.stringify(newUser));
   };
 
@@ -152,11 +170,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       } : undefined,
     };
     setUser(created);
+    syncSessionCookie(created);
     localStorage.setItem('cafecircle_user', JSON.stringify(created));
   };
 
   const logout = () => {
     setUser(null);
+    syncSessionCookie(null);
     if (typeof window !== 'undefined') {
       localStorage.removeItem('cafecircle_user');
     }

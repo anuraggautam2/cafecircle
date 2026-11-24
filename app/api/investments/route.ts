@@ -1,17 +1,34 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { getAuthenticatedUser, requireAuth } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const userId = searchParams.get('userId');
+    const requestedUserId = searchParams.get('userId');
+    const authUser = await getAuthenticatedUser(request);
+
+    // If caller has an active session, enforce authorization boundary
+    let targetUserId = requestedUserId;
+    if (authUser) {
+      if (authUser.role !== 'ADMIN') {
+        // Non-admin callers can only view their own investments
+        if (requestedUserId && requestedUserId !== authUser.id) {
+          return NextResponse.json(
+            { error: 'Forbidden: You can only view your own investment portfolio.' },
+            { status: 403 }
+          );
+        }
+        targetUserId = authUser.id;
+      }
+    }
 
     let investorId: string | undefined;
-    if (userId) {
+    if (targetUserId) {
       const inv = await prisma.investor.findFirst({
-        where: { userId },
+        where: { userId: targetUserId },
       });
       if (inv) investorId = inv.id;
     }
@@ -33,18 +50,27 @@ export async function GET(request: Request) {
     return NextResponse.json(investments);
   } catch (error: any) {
     console.error('Error fetching investments:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to fetch investments' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
+    // Server-side authentication check
+    const { user: authUser, error: authError } = await requireAuth(request);
+    if (authError || !authUser) {
+      return authError || NextResponse.json(
+        { error: 'Unauthorized: An authenticated session is required to participate in campaigns.' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
-    const { campaignId, userId, amount, paymentMethod } = body;
+    const { campaignId, userId: requestedUserId, amount, paymentMethod } = body;
 
     const numericAmount = parseFloat(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
-      return NextResponse.json({ error: 'Valid investment amount is required' }, { status: 400 });
+      return NextResponse.json({ error: 'A valid positive investment amount is required.' }, { status: 400 });
     }
 
     // 1. Fetch Campaign
@@ -57,8 +83,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
     }
 
-    // 2. Fetch or create Investor
-    let targetUserId = userId || 'usr_investor_priya';
+    if (campaign.status !== 'ACTIVE') {
+      return NextResponse.json({ error: 'This campaign is not currently accepting investments.' }, { status: 400 });
+    }
+
+    if (campaign.minInvestment && numericAmount < campaign.minInvestment) {
+      return NextResponse.json(
+        { error: `Minimum contribution for this campaign is ₹${campaign.minInvestment.toLocaleString('en-IN')}` },
+        { status: 400 }
+      );
+    }
+
+    // 2. Identity Verification: Server never trusts spoofed browser client userId
+    // Admin can test on behalf of an explicit user; otherwise force authenticated user id
+    let targetUserId = authUser.id;
+    if (authUser.role === 'ADMIN' && requestedUserId) {
+      targetUserId = requestedUserId;
+    }
+
     let investor = await prisma.investor.findFirst({
       where: { userId: targetUserId },
     });
@@ -141,22 +183,50 @@ export async function POST(request: Request) {
       },
     });
 
-    // 9. Generate or ensure unique referral record for this backer and this cafe
-    const refCode = `${(campaign.cafe.name.slice(0, 4) + '-' + targetUserId.slice(-4)).toUpperCase()}`;
-    const referral = await prisma.referral.upsert({
-      where: { referralCode: refCode },
-      update: {},
-      create: {
+    // 9. Generate or ensure unique, sanitized, URL-safe referral record
+    // Check if the backer already has a referral record for this cafe
+    let referral = await prisma.referral.findFirst({
+      where: {
         referrerId: targetUserId,
         cafeId: campaign.cafe.id,
-        referralCode: refCode,
-        totalClicks: 0,
-        totalVisits: 0,
-        totalConversions: 0,
-        totalShares: 0,
-        advocatePoints: 100, // Welcome points
       },
     });
+
+    if (!referral) {
+      // Clean cafe prefix: alphanumeric only, uppercase, 4-6 chars
+      const cafeBase = (campaign.cafe.slug || campaign.cafe.name)
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '')
+        .slice(0, 6) || 'CAFE';
+
+      // Clean user prefix: alphanumeric only, uppercase, last 4 chars
+      const userBase = targetUserId
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, '')
+        .slice(-4) || 'USER';
+
+      // Ensure code uniqueness and URL-safety
+      let refCode = `${cafeBase}-${userBase}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      let collision = await prisma.referral.findUnique({ where: { referralCode: refCode } });
+      while (collision) {
+        const freshSuffix = Math.random().toString(36).substring(2, 6).toUpperCase();
+        refCode = `${cafeBase}-${userBase}-${freshSuffix}`;
+        collision = await prisma.referral.findUnique({ where: { referralCode: refCode } });
+      }
+
+      referral = await prisma.referral.create({
+        data: {
+          referrerId: targetUserId,
+          cafeId: campaign.cafe.id,
+          referralCode: refCode,
+          totalClicks: 0,
+          totalVisits: 0,
+          totalConversions: 0,
+          totalShares: 0,
+          advocatePoints: 100, // Welcome points
+        },
+      });
+    }
 
     // 10. Send Notifications
     await prisma.notification.create({
@@ -169,16 +239,18 @@ export async function POST(request: Request) {
       },
     });
 
-    // Notify cafe owner
-    await prisma.notification.create({
-      data: {
-        userId: campaign.cafe.owner.userId,
-        title: '💼 New Community Backer',
-        message: `A community investor contributed ₹${numericAmount.toLocaleString('en-IN')} to "${campaign.title}".`,
-        type: 'INVESTMENT',
-        link: '/dashboard/owner',
-      },
-    });
+    // Notify cafe owner if owner user exists
+    if (campaign.cafe.owner?.userId) {
+      await prisma.notification.create({
+        data: {
+          userId: campaign.cafe.owner.userId,
+          title: '💼 New Community Backer',
+          message: `A community investor contributed ₹${numericAmount.toLocaleString('en-IN')} to "${campaign.title}".`,
+          type: 'INVESTMENT',
+          link: '/dashboard/owner',
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,
@@ -189,6 +261,6 @@ export async function POST(request: Request) {
     }, { status: 201 });
   } catch (error: any) {
     console.error('Error processing investment:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to process investment' }, { status: 500 });
   }
 }

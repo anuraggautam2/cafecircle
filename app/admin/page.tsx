@@ -34,9 +34,12 @@ export default function AdminDashboardPage() {
 
   const handleVerifyCafe = async (cafeId: string, isVerified: boolean) => {
     try {
-      await fetch('/api/admin/verify', {
+      const res = await fetch('/api/admin/verify', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cafecircle-user-id': user?.id || '',
+        },
         body: JSON.stringify({
           type: 'CAFE',
           id: cafeId,
@@ -44,6 +47,11 @@ export default function AdminDashboardPage() {
           status: isVerified ? 'VERIFIED_COMMUNITY_CAFE' : 'UNVERIFIED',
         }),
       });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Failed to update cafe status.');
+        return;
+      }
       setActionMessage(`Cafe verification status updated.`);
       setTimeout(() => setActionMessage(''), 3000);
       loadData();
@@ -54,15 +62,23 @@ export default function AdminDashboardPage() {
 
   const handleUpdateCampaignStatus = async (campId: string, status: string) => {
     try {
-      await fetch('/api/admin/verify', {
+      const res = await fetch('/api/admin/verify', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cafecircle-user-id': user?.id || '',
+        },
         body: JSON.stringify({
           type: 'CAMPAIGN',
           id: campId,
           status,
         }),
       });
+      if (!res.ok) {
+        const data = await res.json();
+        alert(data.error || 'Failed to update campaign status.');
+        return;
+      }
       setActionMessage(`Campaign status updated to ${status}.`);
       setTimeout(() => setActionMessage(''), 3000);
       loadData();

@@ -16,7 +16,11 @@ export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
 
   const fetchNotifs = () => {
-    fetch(`/api/notifications?userId=${user?.id}`)
+    fetch(`/api/notifications?userId=${user?.id}`, {
+      headers: {
+        'x-cafecircle-user-id': user?.id || '',
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data)) setNotifications(data);
@@ -32,7 +36,10 @@ export default function NotificationsPage() {
   const markAllAsRead = async () => {
     await fetch('/api/notifications', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-cafecircle-user-id': user?.id || '',
+      },
       body: JSON.stringify({ userId: user?.id }),
     });
     fetchNotifs();
@@ -41,7 +48,10 @@ export default function NotificationsPage() {
   const markSingleRead = async (id: string) => {
     await fetch('/api/notifications', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-cafecircle-user-id': user?.id || '',
+      },
       body: JSON.stringify({ id }),
     });
     fetchNotifs();

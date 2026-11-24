@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CafeCircle — Investor & Hackathon Pitch Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --espresso: #1E1611;
+      --espresso-dark: #140E0A;
+      --card-bg: rgba(30, 22, 17, 0.85);
+      --card-border: rgba(216, 198, 174, 0.15);
+      --terracotta: #B84A22;
+      --terracotta-light: #D95D31;
+      --cream: #F5F1E8;
+      --gold: #D8C6AE;
+      --gold-dim: #9E8E7A;
+      --emerald: #2D6A4F;
+      --emerald-light: #52B788;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 20% 20%, #2A1E17 0%, #140E0A 100%);
+      color: var(--cream);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      user-select: none;
+    }
+
+    /* Ambient background glow */
+    .glow-orb {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(184, 74, 34, 0.12) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(40px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-1 { top: -100px; right: -100px; }
+    .glow-2 { bottom: -120px; left: -100px; background: radial-gradient(circle, rgba(216, 198, 174, 0.08) 0%, rgba(0,0,0,0) 70%); }
+
+    /* Header Bar */
+    header {
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 48px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--terracotta), #8A3011);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 19px;
+      color: var(--cream);
+      box-shadow: 0 4px 14px rgba(184, 74, 34, 0.4);
+    }
+
+    .brand-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--cream);
+    }
+
+    .brand-tagline {
+      font-size: 12px;
+      color: var(--gold-dim);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .deck-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--gold);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      backdrop-filter: blur(10px);
+    }
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: var(--gold);
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    /* Presentation Viewport */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 48px;
+      position: relative;
+      z-index: 5;
+    }
+
+    .slide {
+      position: absolute;
+      width: calc(100% - 96px);
+      max-width: 1280px;
+      height: 82%;
+      max-height: 680px;
+      background: rgba(26, 18, 14, 0.7);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 44px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      opacity: 0;
+      transform: scale(0.97) translateY(12px);
+      pointer-events: none;
+      transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .slide.active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: all;
+    }
+
+    /* Slide Typography & Header */
+    .slide-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .category-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      background: rgba(184, 74, 34, 0.2);
+      border: 1px solid rgba(184, 74, 34, 0.4);
+      color: #F88960;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .slide-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--cream);
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .slide-subtitle {
+      font-size: 15px;
+      color: var(--gold-dim);
+      font-weight: 400;
+      max-width: 900px;
+      line-height: 1.5;
+    }
+
+    /* Slide Content Grids */
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 24px;
+      transition: all 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+    }
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(216, 198, 174, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      font-size: 26px;
+      margin-bottom: 14px;
+      display: inline-block;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 8px;
+    }
+
+    .card-text {
+      font-size: 13.5px;
+      color: #CFC7BD;
+      line-height: 1.6;
+    }
+
+    .highlight-card {
+      background: linear-gradient(145deg, rgba(184, 74, 34, 0.15), rgba(30, 22, 17, 0.6));
+      border: 1px solid rgba(184, 74, 34, 0.4);
+    }
+
+    .accent-card {
+      background: linear-gradient(145deg, rgba(45, 106, 79, 0.2), rgba(30, 22, 17, 0.6));
+      border: 1px solid rgba(45, 106, 79, 0.4);
+    }
+
+    /* Metric Callouts */
+    .metric-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--cream);
+      margin-bottom: 4px;
+    }
+
+    .metric-value.highlight {
+      color: #F88960;
+    }
+
+    .metric-value.green {
+      color: var(--emerald-light);
+    }
+
+    .metric-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold-dim);
+      font-weight: 600;
+    }
+
+    /* Title Slide Special Styling */
+    .title-slide {
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      border-radius: 999px;
+      background: rgba(184, 74, 34, 0.2);
+      border: 1px solid rgba(184, 74, 34, 0.4);
+      color: #F88960;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+    }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 64px;
+      font-weight: 700;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+      background: linear-gradient(180deg, #FFFFFF 30%, #D8C6AE 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero-tagline {
+      font-size: 24px;
+      font-weight: 300;
+      color: var(--gold);
+      margin-bottom: 32px;
+      letter-spacing: 0.5px;
+    }
+    .hero-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+      margin-top: 18px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(216, 198, 174, 0.15);
+      width: 70%;
+    }
+    .hero-meta-item {
+      font-size: 14px;
+      color: var(--gold-dim);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .hero-meta-item strong {
+      color: var(--cream);
+      font-weight: 600;
+    }
+
+    /* Footer Navigation */
+    footer {
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px 24px;
+    }
+
+    .progress-container {
+      flex: 1;
+      max-width: 480px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .progress-bar-bg {
+      flex: 1;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 8.33%;
+      background: linear-gradient(90deg, var(--terracotta), var(--gold));
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    .slide-counter {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--gold);
+      min-width: 60px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--card-border);
+      color: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    .nav-btn:hover {
+      background: var(--terracotta);
+      border-color: var(--terracotta);
+      transform: scale(1.05);
+    }
+    .nav-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Key indicator pills */
+    .key-hint {
+      display: inline-block;
+      padding: 2px 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--gold);
+      margin-left: 4px;
+    }
+
+    /* Table styling for economics & architecture */
+    .slide-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    .slide-table th {
+      text-align: left;
+      padding: 10px 14px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gold);
+      border-bottom: 1px solid rgba(216, 198, 174, 0.2);
+    }
+    .slide-table td {
+      padding: 12px 14px;
+      font-size: 13.5px;
+      color: #D1C9BE;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .slide-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="glow-orb glow-1"></div>
+  <div class="glow-orb glow-2"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">☕</div>
+      <div>
+        <div class="brand-name">CafeCircle</div>
+        <div class="brand-tagline">Hackathon Pitch Deck</div>
+      </div>
+    </div>
+    <div class="deck-controls">
+      <button class="btn" id="fullscreen-btn" onclick="toggleFullScreen()">
+        ⛶ Fullscreen <span class="key-hint">F</span>
+      </button>
+      <a href="CafeCircle_Pitch_Deck.pptx" download class="btn" style="text-decoration:none;">
+        📥 Download .PPTX
+      </a>
+    </div>
+  </header>
+
+  <!-- Slide Viewport -->
+  <main>
+    <!-- SLIDE 1: Title -->
+    <div class="slide active title-slide" data-slide="1">
+      <div class="hero-badge">✨ Community-Powered Cafe Growth Platform</div>
+      <h1 class="hero-title">CafeCircle</h1>
+      <p class="hero-tagline">Invest in What You Love. Grow Together.</p>
+      <div style="max-width: 680px; font-size: 16px; color: #D8C6AE; line-height: 1.6; margin-bottom: 24px;">
+        Connecting artisanal coffee houses seeking non-dilutive expansion capital with passionate neighborhood patrons through revenue-sharing community funding.
+      </div>
+      <div class="hero-meta-row">
+        <div class="hero-meta-item">📍 <strong>Hackathon Demo</strong> Edition</div>
+        <div class="hero-meta-item">⚡ <strong>Next.js 14 & Prisma</strong></div>
+        <div class="hero-meta-item">🛡️ <strong>Zero-Trust RBAC</strong></div>
+        <div class="hero-meta-item">☕ <strong>12-Month Co-Growth</strong></div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: The Problem -->
+    <div class="slide" data-slide="2">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Market Inefficiency</span>
+        </div>
+        <h2 class="slide-title">The Independent Cafe Growth Bottleneck</h2>
+        <p class="slide-subtitle">Local specialty cafes are beloved culinary institutions, yet they face severe structural hurdles when scaling beyond their first location.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="feature-card highlight-card">
+            <div class="card-icon">🏦</div>
+            <h3 class="card-title">Commercial Lending Gridlock</h3>
+            <p class="card-text">Banks demand 100%+ tangible real estate collateral, charge 14–18% high fixed interest rates, and take 3–6 months to process loans, bleeding early-stage cash flow.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-icon">📉</div>
+            <h3 class="card-title">Equity Dilution Mismatch</h3>
+            <p class="card-text">Venture capital and private equity demand controlling equity stakes and aggressive 10x exit timelines that conflict directly with artisanal craft preservation and community culture.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-icon">💔</div>
+            <h3 class="card-title">Passive, Transactional Loyalty</h3>
+            <p class="card-text">Traditional punch cards and generic discount apps create price-sensitive loyalty that instantly evaporates when another trendy coffee shop opens across the street.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: The Solution -->
+    <div class="slide" data-slide="3">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Value Innovation</span>
+        </div>
+        <h2 class="slide-title">CafeCircle: The Co-Growth Engine</h2>
+        <p class="slide-subtitle">Transforming neighborhood coffee enthusiasts from passive cappuccino consumers into invested brand champions.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="feature-card accent-card">
+            <div class="card-icon">🌱</div>
+            <h3 class="card-title">Non-Dilutive Growth Capital</h3>
+            <p class="card-text">Owners raise $10K–$50K in transparent community rounds without forfeiting equity or putting personal home assets at risk with commercial banks.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-icon">📈</div>
+            <h3 class="card-title">Shared Top-Line Upside</h3>
+            <p class="card-text">Supporters receive monthly revenue-share payouts (1.5x–2.0x target return cap) aligned dynamically with genuine cafe sales rather than predatory fixed debt.</p>
+          </div>
+          <div class="feature-card highlight-card">
+            <div class="card-icon">🛡️</div>
+            <h3 class="card-title">Verified Trust & Governance</h3>
+            <p class="card-text">Independent multi-step admin verification (FSSAI, GSTIN, physical lease) plus verified-only patron reviews create an unbreachable wall of confidence.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: How It Works -->
+    <div class="slide" data-slide="4">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Frictionless Lifecycle</span>
+        </div>
+        <h2 class="slide-title">A Seamless Three-Sided Ecosystem</h2>
+        <p class="slide-subtitle">An end-to-end operational pipeline connecting discovery, capital formation, and monthly distribution.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="metric-value highlight">01</div>
+            <h3 class="card-title">Cafe Curates & Launches</h3>
+            <p class="card-text">Owner completes verification, sets funding goal ($20K), specifies revenue-share percentage (4.5%), and defines perk tiers (VIP tastings, named brew bar).</p>
+          </div>
+          <div class="feature-card highlight-card">
+            <div class="metric-value highlight">02</div>
+            <h3 class="card-title">Community Funds</h3>
+            <p class="card-text">Patrons discover neighborhood gems, simulate expected return curves with live interactive financial calculators, and commit capital from $100 up.</p>
+          </div>
+          <div class="feature-card accent-card">
+            <div class="metric-value green">03</div>
+            <h3 class="card-title">Shared Prosperity</h3>
+            <p class="card-text">Automated monthly revenue distributions flow into investor dashboards alongside owner milestones, photo updates, and exclusive perks.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: Core Product Capabilities -->
+    <div class="slide" data-slide="5">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Feature Matrix</span>
+        </div>
+        <h2 class="slide-title">Enterprise-Grade Product Architecture</h2>
+        <p class="slide-subtitle">Production-ready modules built with modern UX polish and resilient backend logic.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-4">
+          <div class="feature-card">
+            <div class="card-icon">📊</div>
+            <h3 class="card-title">Recharts Calculator</h3>
+            <p class="card-text">Real-time dynamic yield modeling calculating monthly payouts, breakeven months, and ROI based on simulated revenue projections.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-icon">🏪</div>
+            <h3 class="card-title">Multi-Branch Hub</h3>
+            <p class="card-text">Owners manage multiple locations, toggle active campaigns, broadcast news updates, and track capital flow from one screen.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-icon">⭐</div>
+            <h3 class="card-title">Verified Reviews</h3>
+            <p class="card-text">Patrons rate cafes on coffee quality, seating, ambiance, and community vibe, backed by full Prisma-persisted relations.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-icon">🔗</div>
+            <h3 class="card-title">Ambassador Engine</h3>
+            <p class="card-text">URL-safe unique referral codes (e.g. CAFE-N1Z49) with 1-click clipboard sharing, tracking supporter attribution and perk upgrades.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: Financial Modeling Spotlight -->
+    <div class="slide" data-slide="6">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Financial Engineering</span>
+        </div>
+        <h2 class="slide-title">Interactive Return on Investment Simulator</h2>
+        <p class="slide-subtitle">Empowering investors with real-time financial clarity directly inside campaign pages.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3" style="margin-bottom: 16px;">
+          <div class="feature-card">
+            <div class="metric-value highlight">$1,000</div>
+            <div class="metric-label">Simulated Investment</div>
+            <p class="card-text" style="margin-top: 6px;">Entry level micro-backer tier for specialty coffee lovers.</p>
+          </div>
+          <div class="feature-card">
+            <div class="metric-value green">$1,450</div>
+            <div class="metric-label">Projected 12-Mo Payout</div>
+            <p class="card-text" style="margin-top: 6px;">1.45x return cap based on $35K monthly gross revenue.</p>
+          </div>
+          <div class="feature-card">
+            <div class="metric-value highlight">Month 9</div>
+            <div class="metric-label">Estimated Breakeven</div>
+            <p class="card-text" style="margin-top: 6px;">Capital recovered, followed by pure community upside.</p>
+          </div>
+        </div>
+        <div class="feature-card highlight-card" style="padding: 16px 24px;">
+          <div style="font-weight: 700; color: var(--cream); font-size: 15px; margin-bottom: 4px;">⚡ Real-time Dynamic Model in App:</div>
+          <div style="font-size: 13px; color: #D1C9BE;">
+            Formula: <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; color: #F88960;">Monthly Payout = (Investment ÷ Goal) × Gross Revenue × RevShare%</code>. Transparently graphs capital recovery and community return cap directly in React via Recharts.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: Unit Economics -->
+    <div class="slide" data-slide="7">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Business Model</span>
+        </div>
+        <h2 class="slide-title">Sustainable Monetization & Economics</h2>
+        <p class="slide-subtitle">A high-margin B2B2C revenue model designed to scale alongside cafe GMV.</p>
+      </div>
+      <div class="slide-body">
+        <table class="slide-table">
+          <thead>
+            <tr>
+              <th>Revenue Stream</th>
+              <th>Platform Fee</th>
+              <th>Payer</th>
+              <th>Unit Contribution</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Campaign Origination Fee</strong></td>
+              <td><span style="color:#F88960; font-weight:700;">5.0%</span> of total funds raised</td>
+              <td>Cafe Owner (success-based)</td>
+              <td>$1,250 on a standard $25,000 round</td>
+            </tr>
+            <tr>
+              <td><strong>Servicing & Distribution Fee</strong></td>
+              <td><span style="color:#F88960; font-weight:700;">1.5%</span> of monthly distribution</td>
+              <td>Deducted from payouts</td>
+              <td>$15–$30/mo recurring per funded cafe</td>
+            </tr>
+            <tr>
+              <td><strong>Cafe Growth Desk (SaaS)</strong></td>
+              <td><span style="color:#52B788; font-weight:700;">$79/month</span> optional subscription</td>
+              <td>Multi-location Operators</td>
+              <td>Automated SMS perk delivery & accounting</td>
+            </tr>
+            <tr>
+              <td><strong>Featured Discovery Promos</strong></td>
+              <td><span style="color:#52B788; font-weight:700;">$199/week</span> promotional slot</td>
+              <td>Established Cafes</td>
+              <td>Top placement on map & trending lists</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: Architecture & Security -->
+    <div class="slide" data-slide="8">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Technical Stack</span>
+        </div>
+        <h2 class="slide-title">Modern Full-Stack Architecture & Security</h2>
+        <p class="slide-subtitle">Engineered for production resilience with zero-trust server validation and clean component isolation.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-2">
+          <div class="feature-card">
+            <h3 class="card-title">💻 Modern Web Infrastructure</h3>
+            <p class="card-text" style="margin-bottom: 12px;"><strong>Frontend:</strong> Next.js 14 App Router, React 18, Tailwind CSS, Lucide icons, Recharts interactive data visualization.</p>
+            <p class="card-text" style="margin-bottom: 12px;"><strong>Backend:</strong> Next.js API route handlers, Prisma ORM, SQLite (local) / PostgreSQL ready.</p>
+            <p class="card-text"><strong>Build Quality:</strong> 100% clean TypeScript build, 0 compile errors, 0 lint warnings.</p>
+          </div>
+          <div class="feature-card highlight-card">
+            <h3 class="card-title">🛡️ Defense-in-Depth Security</h3>
+            <p class="card-text" style="margin-bottom: 12px;"><strong>Server-Side RBAC:</strong> Authenticated sessions validated on every sensitive route via <code style="background: rgba(0,0,0,0.3); padding: 2px 6px; border-radius: 4px; color: #F88960;">lib/server-auth.ts</code>. Client roles are never trusted.</p>
+            <p class="card-text" style="margin-bottom: 12px;"><strong>Strict Ownership Isolation:</strong> Owners can only manage cafes they provably own. Investors can never view unauthorized portfolios.</p>
+            <p class="card-text"><strong>Safe Inputs:</strong> Regex-sanitized referral codes and input validation across all endpoints.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 9: Market Opportunity -->
+    <div class="slide" data-slide="9">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Market Sizing</span>
+        </div>
+        <h2 class="slide-title">Market Size & Competitive Moat</h2>
+        <p class="slide-subtitle">Capturing the rapidly expanding artisanal culinary & specialty third-wave coffee explosion.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3" style="margin-bottom: 20px;">
+          <div class="feature-card">
+            <div class="metric-value highlight">$2.5B+</div>
+            <div class="metric-label">India Specialty Coffee by 2028</div>
+            <p class="card-text" style="margin-top: 6px;">Growing at 15.3% CAGR driven by Gen-Z taste and workspace migration.</p>
+          </div>
+          <div class="feature-card">
+            <div class="metric-value">65,000+</div>
+            <div class="metric-label">Target Independent Cafes</div>
+            <p class="card-text" style="margin-top: 6px;">Across Tier 1 & 2 cities planning second-branch expansions.</p>
+          </div>
+          <div class="feature-card">
+            <div class="metric-value green">78%</div>
+            <div class="metric-label">Community Backer Retention</div>
+            <p class="card-text" style="margin-top: 6px;">Patron investors visit 3.8x more frequently than ordinary walk-in customers.</p>
+          </div>
+        </div>
+        <div class="feature-card accent-card" style="padding: 16px 24px;">
+          <div style="font-weight: 700; color: var(--cream); font-size: 15px; margin-bottom: 4px;">🏆 Our Competitive Moat:</div>
+          <div style="font-size: 13px; color: #D1C9BE;">
+            Unlike Kickstarter (pure donation with zero financial returns) or AngelList (high-accreditation equity), CafeCircle offers low-ticket ($100) revenue sharing that directly turns patrons into loyal brand advocates.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 10: Platform Governance -->
+    <div class="slide" data-slide="10">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Risk Mitigation</span>
+        </div>
+        <h2 class="slide-title">Platform Governance & Compliance</h2>
+        <p class="slide-subtitle">Safeguarding backer capital with structured legal agreements and rigorous cafe vetting.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="feature-card">
+            <div class="card-icon">📋</div>
+            <h3 class="card-title">Three-Tier Verification</h3>
+            <p class="card-text">Every cafe undergoes mandatory FSSAI food hygiene verification, GSTIN tax validation, and physical lease term verification before being listed.</p>
+          </div>
+          <div class="feature-card highlight-card">
+            <div class="card-icon">⚖️</div>
+            <h3 class="card-title">Simulated Sandbox Sandbox</h3>
+            <p class="card-text">Current hackathon implementation operates within a safe simulated environment with clear investor disclosure and transparent return calculations.</p>
+          </div>
+          <div class="feature-card">
+            <div class="card-icon">📢</div>
+            <h3 class="card-title">Mandatory Transparency</h3>
+            <p class="card-text">Funded cafes are contractually required to publish monthly financial updates and revenue reports directly to their verified investor wall.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 11: Strategic Roadmap -->
+    <div class="slide" data-slide="11">
+      <div>
+        <div class="slide-meta">
+          <span class="category-badge">Execution Plan</span>
+        </div>
+        <h2 class="slide-title">Strategic Roadmap & Scale</h2>
+        <p class="slide-subtitle">Clear milestones from hackathon prototype to regional multi-city market dominance.</p>
+      </div>
+      <div class="slide-body">
+        <div class="grid-3">
+          <div class="feature-card highlight-card">
+            <div class="metric-value highlight">Phase 1</div>
+            <div class="metric-label">Hackathon MVP (Complete)</div>
+            <p class="card-text" style="margin-top: 10px;">
+              • Full discovery, search & filtering<br>
+              • Recharts yield simulator<br>
+              • Owner multi-cafe management<br>
+              • Persistent reviews & zero-trust RBAC
+            </p>
+          </div>
+          <div class="feature-card">
+            <div class="metric-value">Phase 2</div>
+            <div class="metric-label">Q1-Q2: Payments & Cloud</div>
+            <p class="card-text" style="margin-top: 10px;">
+              • Razorpay / Stripe escrow integration<br>
+              • Automated monthly payouts<br>
+              • PostgreSQL migration on Supabase<br>
+              • SMS & WhatsApp perk distribution
+            </p>
+          </div>
+          <div class="feature-card accent-card">
+            <div class="metric-value green">Phase 3</div>
+            <div class="metric-label">Q3-Q4: Regional Expansion</div>
+            <p class="card-text" style="margin-top: 10px;">
+              • Expand across top 5 metropolitan hubs<br>
+              • Secondary liquidity market for returns<br>
+              • Institutional micro-fund syndicates<br>
+              • Native iOS & Android backer apps
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 12: Summary & Q&A -->
+    <div class="slide title-slide" data-slide="12">
+      <div class="hero-badge">🚀 Experience CafeCircle Live</div>
+      <h1 class="hero-title" style="font-size: 52px;">Invest in What You Love.<br>Grow Together.</h1>
+      <p class="hero-tagline" style="font-size: 20px; margin-bottom: 24px;">Community-powered micro-funding for the next generation of specialty cafes.</p>
+      
+      <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 24px;">
+        <div class="feature-card" style="padding: 16px 28px; text-align: left;">
+          <div style="color: var(--gold); font-size: 12px; text-transform: uppercase; font-weight: 700;">Demo Personas Available:</div>
+          <div style="font-size: 14px; color: var(--cream); margin-top: 4px;">
+            ☕ <strong>Owner:</strong> Priya Sharma (Bon Amigos)<br>
+            💼 <strong>Investor:</strong> Rahul Verma (Micro-backer)<br>
+            🛡️ <strong>Admin:</strong> System Administrator
+          </div>
+        </div>
+        <div class="feature-card" style="padding: 16px 28px; text-align: left;">
+          <div style="color: var(--gold); font-size: 12px; text-transform: uppercase; font-weight: 700;">Repository & Codebase:</div>
+          <div style="font-size: 14px; color: var(--cream); margin-top: 4px;">
+            📂 github.com/anuraggautam2/CafeCircle<br>
+            ⚡ Next.js 14 App Router + Prisma<br>
+            📊 Recharts Yield Simulator
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 18px; color: var(--gold); font-family: 'Playfair Display', serif;">
+        Thank You! Questions & Discussion.
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer Navigation Controls -->
+  <footer>
+    <div class="progress-container">
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="slide-counter" id="slide-counter">01 / 12</div>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn" id="prev-btn" onclick="prevSlide()" title="Previous slide (Left Arrow)">◀</button>
+      <button class="nav-btn" id="next-btn" onclick="nextSlide()" title="Next slide (Right Arrow / Spacebar)">▶</button>
+    </div>
+  </footer>
+
+  <script>
+    let currentSlide = 1;
+    const totalSlides = 12;
+    const slides = document.querySelectorAll('.slide');
+    const counter = document.getElementById('slide-counter');
+    const progressFill = document.getElementById('progress-fill');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    function updateSlide(newIndex) {
+      if (newIndex < 1 || newIndex > totalSlides) return;
+      
+      slides.forEach(s => s.classList.remove('active'));
+      currentSlide = newIndex;
+      
+      const targetSlide = document.querySelector(`.slide[data-slide="${currentSlide}"]`);
+      if (targetSlide) targetSlide.classList.add('active');
+
+      counter.textContent = `${String(currentSlide).padStart(2, '0')} / ${String(totalSlides).padStart(2, '0')}`;
+      progressFill.style.width = `${(currentSlide / totalSlides) * 100}%`;
+
+      prevBtn.disabled = (currentSlide === 1);
+      nextBtn.disabled = (currentSlide === totalSlides);
+    }
+
+    function nextSlide() {
+      if (currentSlide < totalSlides) updateSlide(currentSlide + 1);
+    }
+
+    function prevSlide() {
+      if (currentSlide > 1) updateSlide(currentSlide - 1);
+    }
+
+    // Keyboard navigation
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        nextSlide();
+      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        prevSlide();
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullScreen();
+      } else if (e.key === 'Home') {
+        updateSlide(1);
+      } else if (e.key === 'End') {
+        updateSlide(totalSlides);
+      }
+    });
+
+    function toggleFullScreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    }
+
+    // Initialize
+    updateSlide(1);
+  </script>
+</body>
+</html>

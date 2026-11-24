@@ -1,11 +1,20 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useAuth } from '@/lib/auth-context';
 import { Campaign } from '@/lib/types';
 import InvestModal from '@/components/InvestModal';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from 'recharts';
 import {
   MapPin,
   Calendar,
@@ -19,6 +28,8 @@ import {
   Check,
   Download,
   AlertTriangle,
+  Percent,
+  Coins,
 } from 'lucide-react';
 import SimulatedBadge from '@/components/SimulatedBadge';
 
@@ -34,6 +45,51 @@ export default function CampaignDetailsPage() {
 
   // Pledge tier selector
   const [selectedTierAmount, setSelectedTierAmount] = useState<number>(10000);
+
+  // Interactive return simulation calculator state
+  const [calcAmount, setCalcAmount] = useState<number>(25000);
+  const [calcMonths, setCalcMonths] = useState<number>(24);
+
+  const annualReturnRate = useMemo(() => {
+    if (!campaign?.projectedReturnRate) return 0.14;
+    const match = campaign.projectedReturnRate.match(/(\d+)%/);
+    return match ? parseFloat(match[1]) / 100 : 0.14;
+  }, [campaign?.projectedReturnRate]);
+
+  const projectionData = useMemo(() => {
+    const data = [];
+    const quarters = Math.ceil(calcMonths / 3);
+    const quarterlyRate = annualReturnRate / 4;
+    let accumulatedPayout = 0;
+
+    data.push({
+      period: 'M0',
+      month: 0,
+      invested: calcAmount,
+      cumulativePayout: 0,
+      totalValue: calcAmount,
+    });
+
+    for (let q = 1; q <= quarters; q++) {
+      const month = q * 3;
+      const quarterlyYield = calcAmount * quarterlyRate;
+      accumulatedPayout += quarterlyYield;
+
+      data.push({
+        period: `M${month}`,
+        month,
+        invested: calcAmount,
+        cumulativePayout: Math.round(accumulatedPayout),
+        totalValue: Math.round(calcAmount + accumulatedPayout),
+      });
+    }
+
+    return data;
+  }, [calcAmount, calcMonths, annualReturnRate]);
+
+  const totalProjectedPayout = Math.round(calcAmount * (1 + annualReturnRate * (calcMonths / 12)));
+  const totalGain = totalProjectedPayout - calcAmount;
+  const roiPercentage = Math.round((totalGain / calcAmount) * 100);
 
   useEffect(() => {
     if (!campaignId) return;
@@ -278,19 +334,19 @@ export default function CampaignDetailsPage() {
         {/* Main Tab Details (8 cols) */}
         <div className="lg:col-span-8 space-y-8">
           {activeTab === 'pitch' && (
-            <div className="space-y-6 text-sm text-[#3D3835] leading-relaxed">
-              <div className="stripe-card p-6 sm:p-8 space-y-4">
+            <div className="space-y-6 text-sm text-[#211A17] leading-relaxed">
+              <div className="glass-panel p-6 sm:p-8 space-y-4 border border-white/70 shadow-sm">
                 <h3 className="font-serif font-bold text-xl text-[#181514]">The Thesis</h3>
-                <p className="whitespace-pre-line">{campaign.pitch}</p>
+                <p className="whitespace-pre-line text-stone-700">{campaign.pitch}</p>
 
                 <h4 className="font-serif font-bold text-base text-[#181514] pt-2">
                   Why Community Co-growth
                 </h4>
-                <p>{campaign.reasonForFunding}</p>
+                <p className="text-stone-700">{campaign.reasonForFunding}</p>
               </div>
 
               {/* Term structure explanation */}
-              <div className="stripe-card p-6 sm:p-8 space-y-3">
+              <div className="glass-panel p-6 sm:p-8 space-y-3 border border-white/70 shadow-sm">
                 <h3 className="font-serif font-bold text-lg text-[#181514]">
                   Proposed Return Mechanism
                 </h3>
@@ -311,39 +367,219 @@ export default function CampaignDetailsPage() {
           )}
 
           {activeTab === 'economics' && (
-            <div className="stripe-card p-6 sm:p-8 space-y-6 text-xs text-[#3D3835]">
+            <div className="glass-panel p-6 sm:p-8 space-y-8 text-xs text-[#211A17] border border-white/70 shadow-sm">
               <div>
-                <h3 className="font-serif font-bold text-xl text-[#181514]">
-                  Unit Economics & Branch Capital Plan
+                <div className="text-[10px] font-mono uppercase tracking-wider text-[#B84A22] font-semibold">
+                  Financial Architecture & Unit Economics
+                </div>
+                <h3 className="font-serif font-bold text-2xl text-[#211A17] mt-0.5">
+                  Branch Capital Plan & Return Projections
                 </h3>
-                <p className="text-[#5A5450] mt-1">
-                  Budget allocation submitted by {campaign.cafe?.name} for the {campaign.expansionArea} outlet.
+                <p className="text-stone-600 mt-1">
+                  Budget allocation and growth timeline submitted by {campaign.cafe?.name} for the {campaign.expansionArea} outlet.
                 </p>
               </div>
 
-              <div className="whitespace-pre-line leading-relaxed text-sm">
+              {/* Expansion Narrative */}
+              <div className="p-4 rounded-xl bg-white/50 backdrop-blur-md border border-white/70 whitespace-pre-line leading-relaxed text-xs text-stone-700">
                 {campaign.expansionPlan}
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-4 border-t border-[#F3EFE7]">
-                <div className="p-3 rounded-lg bg-[#F9F7F3] border border-[#E8E2D6]">
-                  <div className="text-[10px] uppercase font-mono text-[#7B746F]">Planned Footfall</div>
-                  <div className="text-base font-bold text-[#181514] mt-0.5">6,500+ / mo</div>
+              {/* Unit Economics Stat Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-4 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-2xs">
+                  <div className="text-[10px] uppercase font-mono text-stone-500">Planned Footfall</div>
+                  <div className="text-xl font-bold font-serif text-[#211A17] mt-1">6,500+ / mo</div>
+                  <div className="text-[11px] text-stone-500 mt-0.5">Target branch capacity</div>
                 </div>
-                <div className="p-3 rounded-lg bg-[#F9F7F3] border border-[#E8E2D6]">
-                  <div className="text-[10px] uppercase font-mono text-[#7B746F]">Avg Guest Ticket</div>
-                  <div className="text-base font-bold text-[#181514] mt-0.5">₹340</div>
+                <div className="p-4 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-2xs">
+                  <div className="text-[10px] uppercase font-mono text-stone-500">Avg Guest Ticket</div>
+                  <div className="text-xl font-bold font-serif text-[#211A17] mt-1">₹340</div>
+                  <div className="text-[11px] text-stone-500 mt-0.5">Beverage & bakehouse combo</div>
                 </div>
-                <div className="p-3 rounded-lg bg-[#F9F7F3] border border-[#E8E2D6]">
-                  <div className="text-[10px] uppercase font-mono text-[#7B746F]">Target Monthly GMV</div>
-                  <div className="text-base font-bold text-[#181514] mt-0.5">₹18.5 Lakhs</div>
+                <div className="p-4 rounded-xl bg-white/60 backdrop-blur-md border border-white/80 shadow-2xs">
+                  <div className="text-[10px] uppercase font-mono text-stone-500">Target Monthly GMV</div>
+                  <div className="text-xl font-bold font-serif text-[#211A17] mt-1">₹18.5 Lakhs</div>
+                  <div className="text-[11px] text-stone-500 mt-0.5">Projected steady-state gross</div>
+                </div>
+              </div>
+
+              {/* INTERACTIVE RECHARTS RETURN SIMULATOR */}
+              <div className="p-6 rounded-2xl bg-white/65 backdrop-blur-md border border-white/80 shadow-xs space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-200/50 pb-4">
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-semibold bg-[#211A17] text-white">
+                      <TrendingUp className="w-3 h-3 text-[#D8C6AE]" />
+                      Interactive Yield Simulator
+                    </div>
+                    <h4 className="font-serif font-bold text-lg text-[#211A17] mt-1">
+                      Simulate Your Quarterly Returns
+                    </h4>
+                  </div>
+                  <div className="text-xs font-mono text-stone-500">
+                    Projected Yield: <strong className="text-emerald-700">{campaign.projectedReturnRate || '12% - 15% p.a.'}</strong>
+                  </div>
+                </div>
+
+                {/* Simulator Controls */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                  {/* Amount Slider */}
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between text-xs font-medium">
+                      <span className="text-stone-700">Simulated Contribution</span>
+                      <span className="font-serif font-bold text-base text-[#211A17]">
+                        ₹{calcAmount.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+
+                    <input
+                      type="range"
+                      min={campaign.minInvestment || 5000}
+                      max={campaign.maxInvestment || 100000}
+                      step={5000}
+                      value={calcAmount}
+                      onChange={(e) => setCalcAmount(parseInt(e.target.value, 10))}
+                      className="w-full accent-[#211A17] cursor-pointer"
+                    />
+
+                    {/* Presets */}
+                    <div className="flex items-center gap-1.5 pt-1">
+                      {[5000, 10000, 25000, 50000, 100000].map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => setCalcAmount(amt)}
+                          className={`px-2 py-1 rounded-lg text-[10px] font-mono transition-all ${
+                            calcAmount === amt
+                              ? 'bg-[#211A17] text-white font-bold shadow-xs'
+                              : 'bg-white/70 text-stone-600 border border-stone-200 hover:bg-white'
+                          }`}
+                        >
+                          ₹{(amt / 1000)}k
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Term Selector */}
+                  <div className="space-y-2.5">
+                    <span className="text-stone-700 text-xs font-medium block">
+                      Repayment & Holding Period
+                    </span>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[12, 24, 36].map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => setCalcMonths(m)}
+                          className={`py-2 px-3 rounded-xl text-xs font-medium transition-all text-center ${
+                            calcMonths === m
+                              ? 'bg-[#211A17] text-white font-semibold shadow-xs'
+                              : 'bg-white/70 text-stone-700 border border-stone-200 hover:bg-white'
+                          }`}
+                        >
+                          <div>{m} Months</div>
+                          <div className={`text-[10px] font-mono ${calcMonths === m ? 'text-[#D8C6AE]' : 'text-stone-400'}`}>
+                            {m / 12} {m === 12 ? 'Year' : 'Years'}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3 Outcome Metric Pills */}
+                <div className="grid grid-cols-3 gap-3 pt-2">
+                  <div className="p-3 rounded-xl bg-white/80 border border-stone-200/70 text-center space-y-0.5">
+                    <div className="text-[10px] font-mono uppercase text-stone-500">Total Payout</div>
+                    <div className="font-serif font-bold text-base text-[#211A17]">
+                      ₹{totalProjectedPayout.toLocaleString('en-IN')}
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200/60 text-center space-y-0.5">
+                    <div className="text-[10px] font-mono uppercase text-emerald-800">Net Estimated Gain</div>
+                    <div className="font-serif font-bold text-base text-emerald-700">
+                      +₹{totalGain.toLocaleString('en-IN')}
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/60 text-center space-y-0.5">
+                    <div className="text-[10px] font-mono uppercase text-amber-800">Cumulative ROI</div>
+                    <div className="font-serif font-bold text-base text-amber-900">
+                      +{roiPercentage}%
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recharts Area Chart */}
+                <div className="pt-2">
+                  <div className="text-[11px] font-mono text-stone-500 mb-2 flex items-center justify-between">
+                    <span>Quarterly Cumulative Payout Timeline</span>
+                    <span>Recharts Simulated Curve</span>
+                  </div>
+                  <div className="h-56 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={projectionData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="payoutGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#211A17" stopOpacity={0.4} />
+                            <stop offset="95%" stopColor="#211A17" stopOpacity={0.0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" />
+                        <XAxis
+                          dataKey="period"
+                          tick={{ fontSize: 10, fill: '#7B746F' }}
+                          tickLine={false}
+                          axisLine={{ stroke: 'rgba(0,0,0,0.1)' }}
+                        />
+                        <YAxis
+                          tick={{ fontSize: 10, fill: '#7B746F' }}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(val) => `₹${val >= 1000 ? `${(val / 1000).toFixed(0)}k` : val}`}
+                        />
+                        <Tooltip
+                          content={({ active, payload, label }: any) => {
+                            if (active && payload && payload.length) {
+                              return (
+                                <div className="p-2.5 rounded-xl border border-white/80 shadow-md text-xs font-sans space-y-1 bg-white/95 backdrop-blur-md">
+                                  <div className="font-mono text-[10px] text-stone-500 font-semibold">{label}</div>
+                                  <div className="text-emerald-700 font-bold">
+                                    Total Payout: ₹{payload[0].value.toLocaleString('en-IN')}
+                                  </div>
+                                  <div className="text-stone-500 text-[10px]">
+                                    Simulated cumulative return
+                                  </div>
+                                </div>
+                              );
+                            }
+                            return null;
+                          }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="cumulativePayout"
+                          stroke="#211A17"
+                          strokeWidth={2}
+                          fillOpacity={1}
+                          fill="url(#payoutGradient)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-stone-50 text-[11px] text-stone-500 border border-stone-200/60 leading-relaxed">
+                  * Projections are modeled after quarterly revenue distributions linked to actual branch footfall. As cafe sales fluctuate seasonally, actual distributions correspond to gross audited sales.
                 </div>
               </div>
             </div>
           )}
 
           {activeTab === 'documents' && (
-            <div className="stripe-card p-6 sm:p-8 space-y-4">
+            <div className="glass-panel p-6 sm:p-8 space-y-4 border border-white/70 shadow-sm">
               <h3 className="font-serif font-bold text-xl text-[#181514]">
                 Audited Due Diligence Package
               </h3>
@@ -389,7 +625,7 @@ export default function CampaignDetailsPage() {
           )}
 
           {activeTab === 'risks' && (
-            <div className="stripe-card p-6 sm:p-8 space-y-4 text-xs text-[#3D3835] border-amber-300 bg-[#FFFDF8]">
+            <div className="glass-panel p-6 sm:p-8 space-y-4 text-xs text-[#211A17] border border-amber-200/80 bg-amber-50/40 shadow-sm">
               <div className="flex items-center gap-2 font-mono text-xs font-bold text-amber-900 uppercase">
                 <AlertTriangle className="w-4 h-4 text-amber-700" />
                 Mandatory Risk Disclosures
@@ -397,17 +633,17 @@ export default function CampaignDetailsPage() {
               <h3 className="font-serif font-bold text-lg text-[#181514]">
                 Operational & Market Risk Assessment
               </h3>
-              <p className="leading-relaxed text-sm">
+              <p className="leading-relaxed text-sm text-stone-700">
                 {campaign.riskFactors}
               </p>
-              <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-950 space-y-1">
+              <div className="p-3 bg-white/70 rounded-xl border border-amber-200/60 text-xs text-amber-950 space-y-1">
                 <strong>Investor Safeguard Notice:</strong> Community revenue-share arrangements do not guarantee absolute financial performance. Backers should only participate with discretionary capital and review the digital term sheet before confirmation.
               </div>
             </div>
           )}
 
           {activeTab === 'backers' && (
-            <div className="stripe-card p-6 sm:p-8 space-y-4">
+            <div className="glass-panel p-6 sm:p-8 space-y-4 border border-white/70 shadow-sm">
               <h3 className="font-serif font-bold text-xl text-[#181514]">
                 Community Backers Roster ({campaign.investments?.length || 0})
               </h3>

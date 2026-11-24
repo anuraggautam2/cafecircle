@@ -42,7 +42,10 @@ export default function InvestModal({ campaign, isOpen, onClose, onSuccess }: In
     try {
       const res = await fetch('/api/investments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cafecircle-user-id': user?.id || '',
+        },
         body: JSON.stringify({
           campaignId: campaign.id,
           userId: user?.id,

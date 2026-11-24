@@ -1,11 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import {
   ArrowRight,
   ShieldCheck,
+  AlertCircle,
+  Building,
 } from 'lucide-react';
 import SimulatedBadge from '@/components/SimulatedBadge';
 
@@ -15,11 +18,14 @@ export default function CreateCampaignPage() {
 
   const [step, setStep] = useState<number>(1);
   const [submitting, setSubmitting] = useState(false);
+  const [ownedCafes, setOwnedCafes] = useState<any[]>([]);
+  const [selectedCafeId, setSelectedCafeId] = useState<string>('');
+  const [loadingCafes, setLoadingCafes] = useState<boolean>(true);
 
   // Form states
   const [title, setTitle] = useState('');
-  const [expansionCity, setExpansionCity] = useState('Bengaluru');
-  const [expansionArea, setExpansionArea] = useState('Indiranagar');
+  const [expansionCity, setExpansionCity] = useState('Ghaziabad');
+  const [expansionArea, setExpansionArea] = useState('RDC, Raj Nagar');
   const [targetAmount, setTargetAmount] = useState('3000000');
   const [minInvestment, setMinInvestment] = useState('5000');
   const [maxInvestment, setMaxInvestment] = useState('100000');
@@ -37,15 +43,40 @@ export default function CreateCampaignPage() {
     'Commercial lease price escalation, delays in municipal health clearances, local specialty coffee bean price volatility.'
   );
 
+  useEffect(() => {
+    if (!user?.id) return;
+    setLoadingCafes(true);
+    fetch(`/api/cafes?ownerId=${user.cafeOwner?.id || user.id}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setOwnedCafes(data);
+          if (data.length > 0) {
+            setSelectedCafeId(data[0].id);
+            if (data[0].city) setExpansionCity(data[0].city);
+          }
+        }
+      })
+      .catch((err) => console.error('Error fetching cafes for campaign:', err))
+      .finally(() => setLoadingCafes(false));
+  }, [user]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedCafeId) {
+      alert('Please select a registered cafe before submitting a campaign.');
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch('/api/campaigns', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cafecircle-user-id': user?.id || '',
+        },
         body: JSON.stringify({
-          cafeId: 'cafe_roastery',
+          cafeId: selectedCafeId,
           title: title || 'New Specialty Roastery Expansion',
           pitch: pitch || 'Expanding our artisanal estate coffee experience.',
           reasonForFunding: reasonForFunding || 'Capital needed for interior masonry and roasting gear.',
@@ -140,8 +171,48 @@ export default function CreateCampaignPage() {
           {step === 1 && (
             <div className="space-y-4">
               <h3 className="font-serif font-bold text-lg text-[#181514]">
-                Step 1: Campaign Title & Expansion Location
+                Step 1: Associated Cafe & Expansion Location
               </h3>
+
+              {/* Select Cafe Entity */}
+              <div>
+                <label className="block text-xs font-semibold text-[#181514] mb-1">
+                  Select Associated Cafe Entity
+                </label>
+                {loadingCafes ? (
+                  <div className="p-2.5 rounded-lg border border-[#E2DCD2] bg-[#F9F7F3] text-xs text-stone-400 font-mono animate-pulse">
+                    Loading verified cafes...
+                  </div>
+                ) : ownedCafes.length === 0 ? (
+                  <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-2">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      No registered cafe profiles found for this account.
+                    </div>
+                    <p className="text-[11px] text-amber-800 leading-relaxed">
+                      You must operate a verified cafe to launch an expansion round. Switch to the <strong>Aarav Sharma (Cafe Owner)</strong> persona in the navbar or register a cafe entity first.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <select
+                      value={selectedCafeId}
+                      onChange={(e) => {
+                        setSelectedCafeId(e.target.value);
+                        const c = ownedCafes.find((item) => item.id === e.target.value);
+                        if (c?.city) setExpansionCity(c.city);
+                      }}
+                      className="w-full p-2.5 rounded-lg border border-[#E2DCD2] bg-[#F9F7F3] text-xs text-[#181514] font-medium focus:outline-none focus:border-[#181514]"
+                    >
+                      {ownedCafes.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name} — {c.address ? c.address.split(',')[0] : c.city} ({c.city})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </div>
 
               <div>
                 <label className="block text-xs font-semibold text-[#181514] mb-1">
@@ -150,7 +221,7 @@ export default function CreateCampaignPage() {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Roastery Coffee House: Whitefield Heritage Brewlab"
+                  placeholder="e.g. Bon Amigos: Vaishali Courtyard Kitchen & Pizzeria"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full p-2.5 rounded-lg border border-[#E2DCD2] bg-[#F9F7F3] text-xs text-[#181514] focus:outline-none focus:border-[#181514]"
@@ -167,11 +238,13 @@ export default function CreateCampaignPage() {
                     onChange={(e) => setExpansionCity(e.target.value)}
                     className="w-full p-2.5 rounded-lg border border-[#E2DCD2] bg-[#F9F7F3] text-xs text-[#181514]"
                   >
+                    <option value="Ghaziabad">Ghaziabad</option>
+                    <option value="Delhi-NCR">Delhi-NCR</option>
+                    <option value="Noida">Noida</option>
                     <option value="Bengaluru">Bengaluru</option>
                     <option value="Mumbai">Mumbai</option>
                     <option value="Pune">Pune</option>
                     <option value="Hyderabad">Hyderabad</option>
-                    <option value="Delhi-NCR">Delhi-NCR</option>
                   </select>
                 </div>
                 <div>
@@ -181,7 +254,7 @@ export default function CreateCampaignPage() {
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Whitefield, Bandra, Koregaon Park"
+                    placeholder="e.g. Vaishali, Indirapuram, Raj Nagar RDC"
                     value={expansionArea}
                     onChange={(e) => setExpansionArea(e.target.value)}
                     className="w-full p-2.5 rounded-lg border border-[#E2DCD2] bg-[#F9F7F3] text-xs text-[#181514]"
@@ -192,8 +265,9 @@ export default function CreateCampaignPage() {
               <div className="flex justify-end pt-4">
                 <button
                   type="button"
+                  disabled={ownedCafes.length === 0 || !title.trim()}
                   onClick={() => setStep(2)}
-                  className="px-5 py-2 rounded-lg text-xs font-semibold bg-[#181514] text-white hover:bg-[#262220] transition-colors flex items-center gap-2"
+                  className="px-5 py-2 rounded-lg text-xs font-semibold bg-[#181514] text-white hover:bg-[#262220] transition-colors flex items-center gap-2 disabled:opacity-40"
                 >
                   Next: Financial Goals &rarr;
                 </button>
@@ -421,7 +495,8 @@ export default function CreateCampaignPage() {
               </h3>
 
               <div className="p-4 rounded-xl bg-[#F9F7F3] border border-[#E8E2D6] space-y-1.5 text-xs font-mono">
-                <div><strong>Title:</strong> {title || 'Whitefield Heritage Expansion'}</div>
+                <div><strong>Associated Cafe:</strong> {ownedCafes.find(c => c.id === selectedCafeId)?.name || 'Verified Cafe Entity'}</div>
+                <div><strong>Title:</strong> {title || 'Community Expansion Offering'}</div>
                 <div><strong>Location:</strong> {expansionArea}, {expansionCity}</div>
                 <div><strong>Target:</strong> ₹{(parseInt(targetAmount || '0') / 100000).toFixed(2)} Lakhs</div>
                 <div><strong>Structure:</strong> {investmentStructure} ({projectedReturnRate})</div>

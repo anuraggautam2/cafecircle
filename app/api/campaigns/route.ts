@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { requireRole } from '@/lib/auth-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -57,6 +58,15 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    // 1. Enforce server-side role authorization
+    const { user, error } = await requireRole(request, ['CAFE_OWNER', 'ADMIN']);
+    if (error || !user) {
+      return error || NextResponse.json(
+        { error: 'Forbidden: Cafe Owner or Admin authorization required to create a campaign.' },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const {
       cafeId,
@@ -77,19 +87,53 @@ export async function POST(request: Request) {
       repaymentPeriod,
     } = body;
 
+    if (!cafeId) {
+      return NextResponse.json({ error: 'A valid cafeId is required to launch a campaign.' }, { status: 400 });
+    }
+
+    if (!title || !pitch) {
+      return NextResponse.json({ error: 'Campaign title and pitch are required.' }, { status: 400 });
+    }
+
+    const parsedTarget = parseFloat(targetAmount);
+    if (isNaN(parsedTarget) || parsedTarget <= 0) {
+      return NextResponse.json({ error: 'A valid target funding amount is required.' }, { status: 400 });
+    }
+
+    // 2. Verify Cafe existence and ownership
+    const cafe = await prisma.cafe.findUnique({
+      where: { id: cafeId },
+      include: { owner: true },
+    });
+
+    if (!cafe) {
+      return NextResponse.json({ error: 'Cafe not found.' }, { status: 404 });
+    }
+
+    // If caller is not ADMIN, verify they actually own this cafe
+    if (user.role !== 'ADMIN') {
+      const isOwner = cafe.owner?.userId === user.id || cafe.ownerId === user.cafeOwner?.id;
+      if (!isOwner) {
+        return NextResponse.json(
+          { error: 'Forbidden: You can only launch campaigns for cafes registered under your account.' },
+          { status: 403 }
+        );
+      }
+    }
+
     const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
     const days = parseInt(durationDays || '30', 10);
     const endDate = new Date(Date.now() + days * 86400000);
 
     const campaign = await prisma.campaign.create({
       data: {
-        cafeId: cafeId || 'cafe_roastery',
+        cafeId: cafe.id,
         title,
         slug: `${slug}-${Date.now().toString().slice(-4)}`,
         pitch,
-        reasonForFunding,
-        expansionPlan: expansionPlan || reasonForFunding,
-        targetAmount: parseFloat(targetAmount),
+        reasonForFunding: reasonForFunding || pitch,
+        expansionPlan: expansionPlan || reasonForFunding || pitch,
+        targetAmount: parsedTarget,
         minInvestment: parseFloat(minInvestment || '5000'),
         maxInvestment: parseFloat(maxInvestment || '100000'),
         startDate: new Date(),
@@ -108,6 +152,6 @@ export async function POST(request: Request) {
     return NextResponse.json(campaign, { status: 201 });
   } catch (error: any) {
     console.error('Error creating campaign:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ error: error?.message || 'Failed to create campaign' }, { status: 500 });
   }
 }

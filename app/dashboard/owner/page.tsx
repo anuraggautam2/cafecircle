@@ -3,12 +3,15 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
-import { PlusCircle, ArrowRight, Check } from 'lucide-react';
+import { PlusCircle, ArrowRight, Check, Store, AlertCircle } from 'lucide-react';
 import SimulatedBadge from '@/components/SimulatedBadge';
 
 export default function CafeOwnerDashboardPage() {
   const { user } = useAuth();
+  const [ownedCafes, setOwnedCafes] = useState<any[]>([]);
+  const [selectedCafeId, setSelectedCafeId] = useState<string>('');
   const [cafe, setCafe] = useState<any>(null);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Progressive disclosure for posting updates & financials
@@ -23,59 +26,96 @@ export default function CafeOwnerDashboardPage() {
 
   const [revGross, setRevGross] = useState('');
   const [revProfit, setRevProfit] = useState('');
+  const [customerFootfall, setCustomerFootfall] = useState('4500');
   const [publishingFinancial, setPublishingFinancial] = useState(false);
   const [financialSuccess, setFinancialSuccess] = useState(false);
 
-  const fetchCafeData = () => {
-    fetch('/api/cafes/bon-amigos-cafe-and-kitchen')
+  // 1. Fetch all cafes owned by the active user
+  useEffect(() => {
+    if (!user?.id) return;
+    setLoading(true);
+
+    fetch(`/api/cafes?ownerId=${user.cafeOwner?.id || user.id}`)
       .then((res) => res.json())
-      .then((data) => {
-        if (!data.error) setCafe(data);
+      .then((cafes) => {
+        if (Array.isArray(cafes) && cafes.length > 0) {
+          setOwnedCafes(cafes);
+          // Default to Bon Amigos if available in user's cafes, otherwise first cafe
+          const preferred = cafes.find((c: any) => c.slug === 'bon-amigos-cafe-and-kitchen') || cafes[0];
+          setSelectedCafeId(preferred.id);
+        } else {
+          setOwnedCafes([]);
+          setCafe(null);
+          setLoading(false);
+        }
       })
-      .catch((err) => console.error(err))
+      .catch((err) => {
+        console.error('Error fetching owner cafes:', err);
+        setLoading(false);
+      });
+  }, [user]);
+
+  // 2. Fetch specific cafe detail whenever selectedCafeId changes
+  const fetchSelectedCafeDetail = (cafeId: string) => {
+    if (!cafeId) return;
+    setLoading(true);
+
+    Promise.all([
+      fetch(`/api/cafes/${cafeId}`).then((res) => res.json()),
+      fetch(`/api/notifications?userId=${user?.id}`).then((res) => res.json()),
+    ])
+      .then(([cafeData, notifsData]) => {
+        if (!cafeData.error) {
+          setCafe(cafeData);
+        }
+        if (Array.isArray(notifsData)) {
+          setNotifications(notifsData);
+        }
+      })
+      .catch((err) => console.error('Error fetching cafe detail:', err))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    fetchCafeData();
-  }, []);
+    if (selectedCafeId) {
+      fetchSelectedCafeDetail(selectedCafeId);
+    }
+  }, [selectedCafeId]);
 
-  const activeCampaign = cafe?.campaigns?.[0] || {
-    title: 'Bon Amigos: Vaishali Courtyard Kitchen & Pizzeria',
-    targetAmount: 2200000,
-    raisedAmount: 1760000,
-    investorCount: 34,
-    status: 'ACTIVE',
-  };
+  const activeCampaign = cafe?.campaigns?.find((c: any) => c.status === 'ACTIVE') || cafe?.campaigns?.[0];
 
-  const percentFunded = Math.min(
-    100,
-    Math.round((activeCampaign.raisedAmount / activeCampaign.targetAmount) * 100)
-  );
+  const percentFunded = activeCampaign && activeCampaign.targetAmount > 0
+    ? Math.min(100, Math.round((activeCampaign.raisedAmount / activeCampaign.targetAmount) * 100))
+    : 0;
 
   const handlePublishUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!updateTitle || !updateContent) return;
+    if (!updateTitle || !updateContent || !cafe?.id) return;
     setPublishingUpdate(true);
     try {
-      await fetch('/api/updates', {
+      const res = await fetch('/api/updates', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cafecircle-user-id': user?.id || '',
+        },
         body: JSON.stringify({
-          cafeId: cafe?.id || 'cafe_roastery',
+          cafeId: cafe.id,
           title: updateTitle,
           content: updateContent,
           milestoneTag: 'Expansion Progress',
         }),
       });
-      setUpdateTitle('');
-      setUpdateContent('');
-      setUpdateSuccess(true);
-      setTimeout(() => {
-        setUpdateSuccess(false);
-        setShowUpdateForm(false);
-      }, 2000);
-      fetchCafeData();
+      if (res.ok) {
+        setUpdateTitle('');
+        setUpdateContent('');
+        setUpdateSuccess(true);
+        setTimeout(() => {
+          setUpdateSuccess(false);
+          setShowUpdateForm(false);
+        }, 2000);
+        fetchSelectedCafeDetail(cafe.id);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -85,29 +125,34 @@ export default function CafeOwnerDashboardPage() {
 
   const handlePublishFinancial = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!revGross || !revProfit) return;
+    if (!revGross || !revProfit || !cafe?.id) return;
     setPublishingFinancial(true);
     try {
-      await fetch('/api/financials', {
+      const res = await fetch('/api/financials', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cafecircle-user-id': user?.id || '',
+        },
         body: JSON.stringify({
-          cafeId: cafe?.id || 'cafe_roastery',
-          month: 'November',
-          year: 2026,
+          cafeId: cafe.id,
+          month: new Date().toLocaleString('en-US', { month: 'long' }),
+          year: new Date().getFullYear(),
           grossRevenue: revGross,
           netProfit: revProfit,
-          customerFootfall: '7200',
+          customerFootfall: customerFootfall || '4800',
         }),
       });
-      setRevGross('');
-      setRevProfit('');
-      setFinancialSuccess(true);
-      setTimeout(() => {
-        setFinancialSuccess(false);
-        setShowFinancialForm(false);
-      }, 2000);
-      fetchCafeData();
+      if (res.ok) {
+        setRevGross('');
+        setRevProfit('');
+        setFinancialSuccess(true);
+        setTimeout(() => {
+          setFinancialSuccess(false);
+          setShowFinancialForm(false);
+        }, 2000);
+        fetchSelectedCafeDetail(cafe.id);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -115,27 +160,82 @@ export default function CafeOwnerDashboardPage() {
     }
   };
 
+  // Compile real activity from cafe updates and user notifications
   const recentActivity = [
-    { title: 'Priya Patel contributed ₹40,000 to HSR expansion', time: '2 hours ago', type: 'investment' },
-    { title: 'Arjun Nair visited HSR Courtyard via community referral link', time: '5 hours ago', type: 'referral' },
-    { title: 'Milestone update posted: Interior Masonry 70% Complete', time: '2 days ago', type: 'update' },
-    { title: 'Verified monthly revenue disclosure recorded for October', time: '4 days ago', type: 'financial' },
-  ];
+    ...(cafe?.businessUpdates || []).map((u: any) => ({
+      title: `Update posted: "${u.title}"`,
+      time: new Date(u.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+      type: 'update',
+    })),
+    ...notifications.map((n: any) => ({
+      title: n.title ? `${n.title}: ${n.message.slice(0, 70)}...` : n.message,
+      time: new Date(n.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+      type: n.type?.toLowerCase() || 'notification',
+    })),
+  ].slice(0, 5);
+
+  if (!loading && ownedCafes.length === 0) {
+    return (
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 space-y-6">
+        <div className="glass-panel p-8 sm:p-12 text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto">
+            <Store className="w-7 h-7" />
+          </div>
+          <h2 className="font-serif text-2xl font-bold text-[#181514]">
+            No Registered Cafe Found
+          </h2>
+          <p className="text-xs sm:text-sm text-stone-500 max-w-md mx-auto leading-relaxed">
+            This account ({user?.name}) does not have an active cafe operator profile registered in the directory.
+          </p>
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/profile/owner"
+              className="btn-primary text-xs py-2 px-5 shadow-sm"
+            >
+              Configure Operator Entity
+            </Link>
+            <Link
+              href="/explore"
+              className="btn-secondary text-xs py-2 px-5"
+            >
+              Browse Directory
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-10">
-      {/* 1. Header: Minimal */}
-      <div className="border-b border-stone-200/50 pb-6 flex items-baseline justify-between">
-        <div>
-          <h1 className="font-serif text-3xl font-bold text-[#181514]">
-            {cafe?.name || 'Bon Amigos Cafe & Kitchen'}
-          </h1>
-          <p className="text-xs text-stone-500 mt-0.5">
-            Owner Dashboard • Founder: Aarav Sharma • {cafe?.city || 'Ghaziabad'}
+      {/* 1. Header: Minimal with Cafe Switcher */}
+      <div className="border-b border-stone-200/50 pb-6 flex flex-col sm:flex-row sm:items-baseline justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <h1 className="font-serif text-3xl font-bold text-[#181514]">
+              {cafe?.name || 'Cafe Operator Dashboard'}
+            </h1>
+          </div>
+          <p className="text-xs text-stone-500">
+            Owner Dashboard • Founder: {user?.name || 'Aarav Sharma'} • {cafe?.address ? `${cafe.address.split(',')[0]}, ${cafe.city}` : (cafe?.city || 'Delhi NCR')}
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {ownedCafes.length > 1 && (
+            <select
+              value={selectedCafeId}
+              onChange={(e) => setSelectedCafeId(e.target.value)}
+              className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-white/70 bg-white/60 backdrop-blur-md text-[#181514] shadow-xs cursor-pointer focus:outline-none"
+            >
+              {ownedCafes.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          )}
+
           <Link
             href="/campaigns/create"
             className="btn-primary px-3.5 py-1.5 text-xs shadow-sm"
@@ -152,7 +252,7 @@ export default function CafeOwnerDashboardPage() {
         <div className="p-6 rounded-2xl glass-panel space-y-2">
           <div className="text-[11px] font-mono uppercase text-stone-400">Funding Progress</div>
           <div className="text-2xl font-serif font-bold text-[#181514]">
-            ₹{(activeCampaign.raisedAmount / 100000).toFixed(2)}L
+            {activeCampaign ? `₹${(activeCampaign.raisedAmount / 100000).toFixed(2)}L` : '₹0.00L'}
           </div>
           <div className="space-y-1">
             <div className="w-full bg-stone-200/60 h-1.5 rounded-full overflow-hidden">
@@ -163,7 +263,7 @@ export default function CafeOwnerDashboardPage() {
             </div>
             <div className="text-[11px] font-mono text-stone-500 flex justify-between">
               <span>{percentFunded}% funded</span>
-              <span>Goal: ₹{(activeCampaign.targetAmount / 100000).toFixed(2)}L</span>
+              <span>Goal: {activeCampaign ? `₹${(activeCampaign.targetAmount / 100000).toFixed(2)}L` : 'No Active Goal'}</span>
             </div>
           </div>
         </div>
@@ -172,10 +272,12 @@ export default function CafeOwnerDashboardPage() {
         <div className="p-6 rounded-2xl glass-panel space-y-1">
           <div className="text-[11px] font-mono uppercase text-stone-400">Community Investors</div>
           <div className="text-2xl font-serif font-bold text-[#181514]">
-            {activeCampaign.investorCount} Backers
+            {activeCampaign ? `${activeCampaign.investorCount} Backers` : '0 Backers'}
           </div>
           <div className="text-xs text-stone-500">
-            Avg: ₹{Math.round(activeCampaign.raisedAmount / (activeCampaign.investorCount || 1)).toLocaleString('en-IN')}
+            {activeCampaign && activeCampaign.investorCount > 0
+              ? `Avg: ₹${Math.round(activeCampaign.raisedAmount / activeCampaign.investorCount).toLocaleString('en-IN')}`
+              : 'Expansion round active'}
           </div>
         </div>
 
@@ -183,9 +285,11 @@ export default function CafeOwnerDashboardPage() {
         <div className="p-6 rounded-2xl glass-panel space-y-1">
           <div className="text-[11px] font-mono uppercase text-stone-400">Campaign Status</div>
           <div className="text-2xl font-serif font-bold text-emerald-700 flex items-center gap-1.5">
-            Active Round
+            {activeCampaign?.status === 'ACTIVE' ? 'Active Round' : (activeCampaign?.status || 'No Open Round')}
           </div>
-          <div className="text-xs text-stone-500">18 days remaining in round</div>
+          <div className="text-xs text-stone-500">
+            {activeCampaign ? `${activeCampaign.expansionArea}, ${activeCampaign.expansionCity}` : 'Prepare expansion campaign'}
+          </div>
         </div>
       </div>
 
@@ -223,7 +327,7 @@ export default function CafeOwnerDashboardPage() {
       {/* Collapsible Update Form */}
       {showUpdateForm && (
         <form onSubmit={handlePublishUpdate} className="p-5 rounded-2xl glass-panel space-y-3 text-xs">
-          <div className="font-serif font-bold text-sm text-[#181514]">Broadcast Update to Backers</div>
+          <div className="font-serif font-bold text-sm text-[#181514]">Broadcast Update to Backers ({cafe?.name})</div>
           <div>
             <input
               type="text"
@@ -258,8 +362,8 @@ export default function CafeOwnerDashboardPage() {
       {/* Collapsible Financial Form */}
       {showFinancialForm && (
         <form onSubmit={handlePublishFinancial} className="p-5 rounded-2xl glass-panel space-y-3 text-xs">
-          <div className="font-serif font-bold text-sm text-[#181514]">Submit Monthly Revenue Disclosure</div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="font-serif font-bold text-sm text-[#181514]">Submit Monthly Revenue Disclosure ({cafe?.name})</div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <input
               type="number"
               required
@@ -274,6 +378,13 @@ export default function CafeOwnerDashboardPage() {
               placeholder="Net Profit (₹)..."
               value={revProfit}
               onChange={(e) => setRevProfit(e.target.value)}
+              className="p-2 rounded-lg border border-[#EAE6DE] text-xs"
+            />
+            <input
+              type="number"
+              placeholder="Monthly Footfall (e.g. 5200)..."
+              value={customerFootfall}
+              onChange={(e) => setCustomerFootfall(e.target.value)}
               className="p-2 rounded-lg border border-[#EAE6DE] text-xs"
             />
           </div>
@@ -291,18 +402,24 @@ export default function CafeOwnerDashboardPage() {
       {/* 4. Recent Activity Feed */}
       <div className="space-y-3">
         <h2 className="font-serif text-lg font-bold text-[#181514]">
-          Recent Activity
+          Recent Activity & Updates
         </h2>
 
         <div className="glass-panel rounded-2xl divide-y divide-stone-200/40 overflow-hidden text-xs">
-          {recentActivity.map((act, idx) => (
-            <div key={idx} className="p-4 flex items-center justify-between text-[#181514]">
-              <div>
-                <span className="font-medium">{act.title}</span>
-              </div>
-              <span className="text-[11px] font-mono text-[#8C857B] shrink-0">{act.time}</span>
+          {recentActivity.length === 0 ? (
+            <div className="p-6 text-center text-xs text-stone-400 font-mono">
+              No recent activity recorded yet for {cafe?.name || 'this cafe'}.
             </div>
-          ))}
+          ) : (
+            recentActivity.map((act, idx) => (
+              <div key={idx} className="p-4 flex items-center justify-between text-[#181514]">
+                <div>
+                  <span className="font-medium">{act.title}</span>
+                </div>
+                <span className="text-[11px] font-mono text-[#8C857B] shrink-0">{act.time}</span>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

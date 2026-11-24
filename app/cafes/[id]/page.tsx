@@ -21,6 +21,8 @@ import {
   Info,
   ChevronRight,
   Sparkles,
+  X,
+  MessageSquarePlus,
 } from 'lucide-react';
 import SimulatedBadge from '@/components/SimulatedBadge';
 
@@ -39,7 +41,13 @@ export default function CafeDetailsPage() {
   const [simulatingVisit, setSimulatingVisit] = useState(false);
   const [visitRecorded, setVisitRecorded] = useState(false);
 
-  useEffect(() => {
+  // Review modal state
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  const loadCafeData = () => {
     if (!cafeId) return;
     fetch(`/api/cafes/${cafeId}`)
       .then((res) => res.json())
@@ -48,7 +56,45 @@ export default function CafeDetailsPage() {
       })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadCafeData();
   }, [cafeId]);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewComment.trim()) return;
+    setSubmittingReview(true);
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-cafecircle-user-id': user?.id || '',
+        },
+        body: JSON.stringify({
+          cafeId: cafe.id,
+          rating: reviewRating,
+          comment: reviewComment.trim(),
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setReviewComment('');
+        setReviewRating(5);
+        setReviewModalOpen(false);
+        loadCafeData();
+      } else {
+        alert(data.error || 'Failed to submit review');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error submitting review');
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -427,13 +473,23 @@ export default function CafeDetailsPage() {
           {/* TAB 3: Reviews */}
           {activeTab === 'reviews' && (
             <div className="glass-panel p-6 sm:p-8 space-y-4">
-              <div className="flex items-baseline justify-between border-b border-stone-200/50 pb-3">
-                <h3 className="font-serif font-bold text-xl text-[#181514]">
-                  Customer & Community Reviews
-                </h3>
-                <div className="text-xs font-mono text-stone-500">
-                  {cafe.rating.toFixed(1)} / 5.0 Rating
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-stone-200/50 pb-3 gap-3">
+                <div>
+                  <h3 className="font-serif font-bold text-xl text-[#181514]">
+                    Customer & Community Reviews
+                  </h3>
+                  <div className="text-xs font-mono text-stone-500 mt-0.5">
+                    {cafe.rating.toFixed(1)} / 5.0 Rating • {cafe.reviewCount || cafe.reviews?.length || 0} reviews
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setReviewModalOpen(true)}
+                  className="btn-primary text-xs py-2 px-3.5 shadow-xs flex items-center gap-1.5 self-start sm:self-auto"
+                >
+                  <MessageSquarePlus className="w-3.5 h-3.5" />
+                  <span>Write a Review</span>
+                </button>
               </div>
 
               <div className="space-y-3 pt-1">
@@ -441,7 +497,14 @@ export default function CafeDetailsPage() {
                   cafe.reviews.map((rev: any) => (
                     <div key={rev.id} className="p-4 rounded-xl bg-white/45 backdrop-blur-md border border-white/60 space-y-1.5 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="font-bold text-stone-900">{rev.user?.name || 'Verified Diner'}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-stone-900">{rev.user?.name || 'Verified Diner'}</span>
+                          {rev.isInvestor && (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60">
+                              Verified Backer
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-0.5 text-amber-500 font-semibold">
                           <Star className="w-3.5 h-3.5 fill-amber-500" />
                           <span>{rev.rating}</span>
@@ -572,6 +635,96 @@ export default function CafeDetailsPage() {
           isOpen={investModalOpen}
           onClose={() => setInvestModalOpen(false)}
         />
+      )}
+
+      {/* Write Review Modal */}
+      {reviewModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md overflow-y-auto">
+          <div className="bg-white/95 backdrop-blur-xl w-full max-w-md rounded-2xl shadow-2xl border border-white/90 overflow-hidden p-6 space-y-4 my-8">
+            <div className="flex items-center justify-between border-b border-[#E8E2D6] pb-3">
+              <div>
+                <div className="text-[10px] font-mono uppercase tracking-wider text-[#B84A22] font-semibold">
+                  Community Feedback
+                </div>
+                <h3 className="font-serif font-bold text-lg text-[#181514]">
+                  Review {cafe.name}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReviewModalOpen(false)}
+                className="p-1.5 text-stone-400 hover:text-stone-700 hover:bg-stone-100 rounded-lg transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleReviewSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-stone-800 mb-1.5">
+                  Your Rating
+                </label>
+                <div className="flex items-center gap-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      className="p-1 text-amber-500 hover:scale-110 transition-transform"
+                    >
+                      <Star
+                        className={`w-6 h-6 ${
+                          star <= reviewRating
+                            ? 'fill-amber-500 text-amber-500'
+                            : 'text-stone-300'
+                        }`}
+                      />
+                    </button>
+                  ))}
+                  <span className="font-mono font-bold text-stone-700 ml-2">
+                    {reviewRating}.0 / 5.0
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-semibold text-stone-800 mb-1">
+                  Your Experience & Ambience Notes
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  placeholder="Share your thoughts on the coffee roast, staff hospitality, seating comfort, or menu highlights..."
+                  className="w-full p-3 rounded-xl border border-stone-200 bg-white/70 text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#211A17]/10"
+                />
+              </div>
+
+              <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-200/60 text-[11px] text-stone-600 flex items-center justify-between">
+                <span>Posting as: <strong className="text-stone-900">{user?.name || 'Guest'}</strong></span>
+                <span className="font-mono text-[10px] text-stone-400">{user?.role}</span>
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setReviewModalOpen(false)}
+                  className="btn-secondary w-1/2 py-2.5 text-xs text-center"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingReview || !reviewComment.trim()}
+                  className="btn-primary w-1/2 py-2.5 text-xs text-center disabled:opacity-50"
+                >
+                  {submittingReview ? 'Submitting...' : 'Post Review'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );
